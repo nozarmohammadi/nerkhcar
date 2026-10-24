@@ -38,7 +38,8 @@ def _result(status: int, data: dict) -> tuple[str, str]:
         text = reply_text(data)
         return ("ok", text) if text else ("empty", "")
     log.warning("پاسخ ناموفق هوش مصنوعی: %s", status)
-    return ("rate_limit" if status == 429 else f"http_{status}"), ""
+    names = {429: "rate_limit", 503: "overloaded"}
+    return names.get(status, f"http_{status}"), ""
 
 
 def make_extractor(key: str):
