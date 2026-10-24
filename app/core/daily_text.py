@@ -1,7 +1,9 @@
 """ساخت خروجی قیمت روز (متن و جدول) و جمع‌کردن ردیف‌ها. بدون تلگرام."""
+from collections import Counter
+from datetime import date
 from html import escape
 
-from app.core import ref_import
+from app.core import jalali, ref_import
 
 CHUNK_CHARS = 3800
 
@@ -20,6 +22,25 @@ def merge_rows(old: list[dict], new: list[dict]) -> list[dict]:
     return old
 
 
+def date_text(texts, today: date | None = None) -> str:
+    """تاریخ شمسی با رقم فارسی، مثل «۲ آبان ۱۴۰۵»."""
+    today = today or date.today()
+    jy, jm, jd = jalali.to_jalali(today.year, today.month, today.day)
+    text = f"{jd} {texts.MONTHS[jm - 1]} {jy}"
+    return text.translate(str.maketrans("0123456789", texts.DIGITS))
+
+
+def _main_year(rows: list[dict]):
+    common = Counter(r["year"] for r in rows).most_common(1)
+    return common[0][0] if common else None
+
+
+def _label(row: dict, main_year) -> str:
+    if row["year"] == main_year:
+        return row["name"]
+    return f"{row['name']} {row['year']}"
+
+
 def _change(row: dict, up: str, down: str) -> str:
     value = row.get("change_m")
     if not value:
@@ -29,15 +50,16 @@ def _change(row: dict, up: str, down: str) -> str:
     return down.format(n=f"{-value:g}")
 
 
-def build_text(rows: list[dict], date: str, texts) -> str:
+def build_text(rows: list[dict], day_text: str, texts) -> str:
+    main = _main_year(rows)
     lines = [
         texts.LINE.format(
-            name=r["name"], year=r["year"], price=f"{r['price_m']:,}",
+            label=_label(r, main), price=f"{r['price_m']:,}",
             change=_change(r, texts.CHANGE_UP, texts.CHANGE_DOWN),
         )
         for r in rows
     ]
-    return texts.HEAD.format(date=date) + "\n".join(lines) + "\n" + texts.FOOT
+    return texts.HEAD.format(date=day_text) + "\n".join(lines) + "\n" + texts.FOOT
 
 
 def text_chunks(text: str) -> list[str]:
@@ -58,16 +80,21 @@ def _cell(tag: str, value) -> str:
     return f"<{tag}>{escape(str(value))}</{tag}>"
 
 
-def _html_row(row: dict, texts) -> str:
+def _html_row(row: dict, main, texts) -> str:
     change = _change(row, texts.CHANGE_UP, texts.CHANGE_DOWN).strip()
-    values = (row["name"], row["year"], f"{row['price_m']:,}",
-              change or texts.NO_VALUE)
+    values = (_label(row, main), f"{row['price_m']:,}", change or texts.NO_VALUE)
     return "<tr>" + "".join(_cell("td", v) for v in values) + "</tr>"
 
 
-def build_html(rows: list[dict], date: str, texts) -> str:
+def build_html(rows: list[dict], day_text: str, texts) -> str:
+    main = _main_year(rows)
     head = "<tr>" + "".join(_cell("th", h) for h in texts.TBL_HEAD) + "</tr>"
-    body = "".join(_html_row(r, texts) for r in rows)
-    title = f"<p><b>{escape(texts.TBL_TITLE.format(date=date))}</b></p>"
+    body = "".join(_html_row(r, main, texts) for r in rows)
+    top = (
+        f"<p><b>{escape(texts.TBL_TITLE)}</b></p>"
+        f"<p>{escape(texts.DATE_LINE.format(date=day_text))}</p>"
+        f"<p>{escape(texts.UNIT)}</p>"
+    )
     foot = f"<p>{escape(texts.FOOT.strip())}</p>"
-    return title + "<table bordered striped>" + head + body + "</table>" + foot
+    table = "<table bordered striped compact>" + head + body + "</table>"
+    return top + table + foot

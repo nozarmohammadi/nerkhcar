@@ -2,6 +2,7 @@
 import asyncio
 import io
 import json
+from datetime import date
 from types import SimpleNamespace
 
 from aiogram.exceptions import TelegramAPIError
@@ -11,7 +12,7 @@ from app.adapters.telegram import daily_send
 from app.adapters.telegram.handlers import daily_prices as h
 from app.adapters.telegram.keyboards import admin_panel as k_panel
 from app.adapters.telegram.texts import daily_prices as t
-from app.core import daily_text, table_parse
+from app.core import daily_text, jalali, table_parse
 
 RAW = [
     {"name": "سهند", "year": 1405, "price": 1810000000, "change": 5000000},
@@ -172,3 +173,16 @@ def test_panel_has_daily_button():
 
 def test_router_registered():
     assert h.router in [m.router for m in main.ROUTER_MODULES]
+
+
+def test_jalali_date_text():
+    assert jalali.to_jalali(2026, 10, 24) == (1405, 8, 2)
+    assert daily_text.date_text(t, date(2026, 10, 24)) == "۲ آبان ۱۴۰۵"
+
+
+def test_compact_table_shape():
+    html = daily_text.build_html(_ready_rows(), "d", t)
+    table = html.split("<table")[1].split("</table>")[0]
+    assert "1405" not in table and "میلیون" not in table
+    assert "▲" in table and "▼" in table and "+" not in table
+    assert "میلیون" in html.split("<table")[0]

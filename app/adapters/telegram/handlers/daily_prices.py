@@ -1,7 +1,6 @@
 """قیمت روز خودرو: چند عکس ← یک پیام وضعیت ← جدول نهایی."""
 import asyncio
 import logging
-from datetime import date
 
 from aiogram import Bot, F, Router
 from aiogram.exceptions import TelegramBadRequest
@@ -125,7 +124,7 @@ async def on_done(
             await cb.answer()
             return
         await daily_send.send_table(
-            bot, cb.message.chat.id, rows, date.today().isoformat(),
+            bot, cb.message.chat.id, rows, daily_text.date_text(t),
             k.result_kb())
         await cb.message.edit_text(t.FINISHED.format(rows=len(rows)))
     await cb.answer()
