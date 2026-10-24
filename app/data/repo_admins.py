@@ -33,3 +33,15 @@ def set_password(conn: sqlite3.Connection, tg_id: int, pw_hash: str) -> None:
         (pw_hash, tg_id),
     )
     conn.commit()
+
+
+def save_auth_state(
+    conn: sqlite3.Connection, tg_id: int, failed_count: int,
+    locked_until: str | None, session_until: str | None,
+) -> None:
+    conn.execute(
+        "UPDATE admins SET failed_count=?, locked_until=?, session_until=? "
+        "WHERE tg_id=?",
+        (failed_count, locked_until, session_until, tg_id),
+    )
+    conn.commit()
