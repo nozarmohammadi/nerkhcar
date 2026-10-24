@@ -46,3 +46,4 @@ ACTION_LABELS = dict([
     ("password_reset", "🔑 ریست رمز"),
     ("password_set", "🔑 تعیین رمز"),
 ])
+BTN_CATALOG = "🚗 کاتالوگ خودرو"

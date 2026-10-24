@@ -8,10 +8,11 @@ def _btn(text: str, data: str) -> list[InlineKeyboardButton]:
     return [InlineKeyboardButton(text=text, callback_data=data)]
 
 
-def panel_kb(role: str) -> InlineKeyboardMarkup | None:
-    if role != "owner":
-        return None
-    rows = [_btn(p.BTN_ADMINS, "adm:menu"), _btn(p.BTN_LOG, "adm:log")]
+def panel_kb(role: str) -> InlineKeyboardMarkup:
+    rows = [_btn(p.BTN_CATALOG, "adm:cat")]
+    if role == "owner":
+        owner_rows = [_btn(p.BTN_ADMINS, "adm:menu"), _btn(p.BTN_LOG, "adm:log")]
+        rows = owner_rows + rows
     return InlineKeyboardMarkup(inline_keyboard=rows)
 
 
