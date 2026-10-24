@@ -1,24 +1,37 @@
-"""قیمت روز خودرو: چند عکس ← خواندن ← جمع‌کردن ← خروجی متن."""
+"""قیمت روز خودرو: چند عکس ← یک پیام وضعیت ← جدول نهایی."""
+import asyncio
+import logging
+from datetime import date
+
 from aiogram import Bot, F, Router
+from aiogram.exceptions import TelegramBadRequest
 from aiogram.fsm.context import FSMContext
 from aiogram.fsm.state import State, StatesGroup
 from aiogram.types import CallbackQuery, Message
 
 from app.adapters.ai import gemini
+from app.adapters.telegram import daily_send
 from app.adapters.telegram.guard import active_admin
 from app.adapters.telegram.keyboards import daily_prices as k
 from app.adapters.telegram.texts import daily_prices as t
 from app.config import Settings
-from app.core import daily_text, table_read
+from app.core import table_read
+from app.core import daily_text
 
+log = logging.getLogger("nerkhcar")
 router = Router()
 router.message.filter(F.chat.type == "private")
 router.callback_query.filter(F.message.chat.type == "private")
 MAX_BYTES = 8 * 1024 * 1024
+_LOCKS: dict[int, asyncio.Lock] = {}
 
 
 class Daily(StatesGroup):
     photos = State()
+
+
+def _lock(user_id: int) -> asyncio.Lock:
+    return _LOCKS.setdefault(user_id, asyncio.Lock())
 
 
 def _image_of(message: Message):
@@ -27,9 +40,26 @@ def _image_of(message: Message):
     return message.document, message.document.mime_type
 
 
-def _today() -> str:
-    from datetime import date
-    return date.today().isoformat()
+async def _show(bot: Bot, message: Message, state: FSMContext, text: str) -> None:
+    """یک پیام وضعیت می‌سازد و بعد از آن همان را ویرایش می‌کند."""
+    mid = (await state.get_data()).get("status_id")
+    if mid is None:
+        sent = await message.answer(text, reply_markup=k.collect_kb())
+        await state.update_data(status_id=sent.message_id)
+        return
+    try:
+        await bot.edit_message_text(
+            text=text, chat_id=message.chat.id, message_id=mid,
+            reply_markup=k.collect_kb())
+    except TelegramBadRequest as exc:
+        log.debug("ویرایش وضعیت لازم نبود: %s", exc)
+
+
+async def _read(bot: Bot, settings: Settings, file, mime: str):
+    image = (await bot.download(file)).read()
+    extractor = gemini.make_extractor(settings.gemini_key)
+    return await table_read.read_table(
+        extractor, image, mime, settings.vision_models)
 
 
 @router.callback_query(F.data == "dp:go")
@@ -42,7 +72,7 @@ async def on_start(cb: CallbackQuery, state: FSMContext, settings: Settings) -> 
         return
     await state.clear()
     await state.set_state(Daily.photos)
-    await state.update_data(rows=[])
+    await state.update_data(rows=[], photos=0)
     await cb.message.answer(t.ASK_PHOTOS, reply_markup=k.collect_kb())
     await cb.answer()
 
@@ -64,35 +94,40 @@ async def on_photo(
     if (file.file_size or 0) > MAX_BYTES:
         await message.answer(t.TOO_BIG)
         return
-    await message.answer(t.READING)
-    image = (await bot.download(file)).read()
-    extractor = gemini.make_extractor(settings.gemini_key)
-    status, rows = await table_read.read_table(
-        extractor, image, mime, settings.vision_models)
-    if status != "ok":
-        await message.answer(t.READ_ERRORS.get(status, t.READ_ERROR_GENERIC))
-        return
-    data = await state.get_data()
-    total = daily_text.merge_rows(data["rows"], rows)
-    await state.update_data(rows=total)
-    await message.answer(
-        t.GOT_ROWS.format(count=len(rows), total=len(total)),
-        reply_markup=k.collect_kb())
+    async with _lock(message.from_user.id):
+        data = await state.get_data()
+        number = data.get("photos", 0) + 1
+        await _show(bot, message, state, t.READING.format(
+            n=number, rows=len(data["rows"])))
+        status, rows = await _read(bot, settings, file, mime)
+        if status != "ok":
+            error = t.READ_ERRORS.get(status, t.READ_ERROR_GENERIC)
+            await _show(bot, message, state, error)
+            return
+        total = daily_text.merge_rows(data["rows"], rows)
+        await state.update_data(rows=total, photos=number)
+        await _show(bot, message, state, t.GOT.format(
+            photos=number, rows=len(total)))
 
 
 @router.callback_query(Daily.photos, F.data == "dp:ok")
-async def on_done(cb: CallbackQuery, state: FSMContext, settings: Settings) -> None:
+async def on_done(
+    cb: CallbackQuery, state: FSMContext, settings: Settings, bot: Bot
+) -> None:
     if active_admin(settings, cb.from_user.id) is None:
         await state.clear()
         await cb.answer()
         return
-    rows = (await state.get_data())["rows"]
-    if not rows:
-        await cb.message.answer(t.NOTHING)
-        await cb.answer()
-        return
-    text = daily_text.build_text(rows, _today(), t)
-    await cb.message.answer(text, reply_markup=k.result_kb())
+    async with _lock(cb.from_user.id):
+        rows = (await state.get_data())["rows"]
+        if not rows:
+            await cb.message.answer(t.NOTHING)
+            await cb.answer()
+            return
+        await daily_send.send_table(
+            bot, cb.message.chat.id, rows, date.today().isoformat(),
+            k.result_kb())
+        await cb.message.edit_text(t.FINISHED.format(rows=len(rows)))
     await cb.answer()
 
 
