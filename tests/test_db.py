@@ -4,7 +4,7 @@ from app.data import db, repo_admins, repo_audit, repo_catalog, repo_prices
 
 def test_migrate_is_idempotent(tmp_path):
     path = tmp_path / "t.db"
-    assert db.migrate(path, tmp_path) == ["001_init"]
+    assert db.migrate(path, tmp_path) == ["001_init", "002_ai_usage"]
     assert db.migrate(path, tmp_path) == []
 
 

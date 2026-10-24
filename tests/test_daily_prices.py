@@ -94,7 +94,14 @@ def _setup(monkeypatch):
 
     monkeypatch.setattr(h, "active_admin", lambda s, uid: object())
     monkeypatch.setattr(h.gemini, "make_extractor", lambda key: fake_ai)
-    return SimpleNamespace(gemini_key="k", vision_models=("m",))
+    import tempfile
+    from pathlib import Path
+    from app.data import db
+    folder = Path(tempfile.mkdtemp())
+    (folder / "b").mkdir()
+    db.migrate(folder / "t.db", folder / "b")
+    return SimpleNamespace(
+        gemini_key="k", vision_models=("m",), db_path=folder / "t.db")
 
 
 def _ready_rows():

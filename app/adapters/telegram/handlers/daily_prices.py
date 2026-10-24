@@ -14,7 +14,8 @@ from app.adapters.telegram.guard import active_admin
 from app.adapters.telegram.keyboards import daily_prices as k
 from app.adapters.telegram.texts import daily_prices as t
 from app.config import Settings
-from app.core import table_read
+from app.data import db, repo_usage
+from app.core import table_read, usage_day
 from app.core import daily_text
 
 log = logging.getLogger("nerkhcar")
@@ -54,9 +55,38 @@ async def _show(bot: Bot, message: Message, state: FSMContext, text: str) -> Non
         log.debug("ویرایش وضعیت لازم نبود: %s", exc)
 
 
+def _counted(extractor, settings: Settings):
+    """هر درخواست واقعی به گوگل را می‌شمارد (مدل اول و پشتیبان)."""
+    async def run(*args, **kwargs):
+        result = await extractor(*args, **kwargs)
+        try:
+            conn = db.connect(settings.db_path)
+            try:
+                repo_usage.add_request(conn, usage_day.pacific_day())
+            finally:
+                conn.close()
+        except Exception as exc:
+            log.warning("شمارش سهمیه ممکن نشد: %s", type(exc).__name__)
+        return result
+    return run
+
+
+def _usage_line(settings: Settings) -> str:
+    try:
+        conn = db.connect(settings.db_path)
+        try:
+            count = repo_usage.get_count(conn, usage_day.pacific_day())
+        finally:
+            conn.close()
+    except Exception as exc:
+        log.warning("خواندن سهمیه ممکن نشد: %s", type(exc).__name__)
+        return ""
+    return t.USAGE.format(n=daily_text.fa(count))
+
+
 async def _read(bot: Bot, settings: Settings, file, mime: str):
     image = (await bot.download(file)).read()
-    extractor = gemini.make_extractor(settings.gemini_key)
+    extractor = _counted(gemini.make_extractor(settings.gemini_key), settings)
     return await table_read.read_table(
         extractor, image, mime, settings.vision_models)
 
@@ -106,7 +136,8 @@ async def on_photo(
         total = daily_text.merge_rows(data["rows"], rows)
         await state.update_data(rows=total, photos=number)
         await _show(bot, message, state, t.GOT.format(
-            photos=number, rows=len(total)))
+            photos=number, rows=len(total),
+            usage=_usage_line(settings)))
 
 
 @router.callback_query(Daily.photos, F.data == "dp:ok")
