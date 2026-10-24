@@ -7,6 +7,7 @@ from html import escape
 from app.core import jalali, ref_import
 
 CHUNK_CHARS = 3800
+MIN_NAME = 34
 
 
 def merge_rows(old: list[dict], new: list[dict]) -> list[dict]:
@@ -100,7 +101,10 @@ def _cell(tag: str, value) -> str:
 def _html_row(row: dict, main, texts) -> str:
     change = _change(row, texts.CHANGE_UP, texts.CHANGE_DOWN).strip()
     values = (_label(row, main), fa(f"{row['price_m']:,}"), change or texts.NO_VALUE)
-    return "<tr>" + "".join(_cell("td", v) for v in values) + "</tr>"
+    pad = "&nbsp;" * max(0, MIN_NAME - len(str(values[0])))
+    cells = [f"<td>{escape(str(values[0]))}{pad}</td>"]
+    cells += [_cell("td", v) for v in values[1:]]
+    return "<tr>" + "".join(cells) + "</tr>"
 
 
 def build_html(

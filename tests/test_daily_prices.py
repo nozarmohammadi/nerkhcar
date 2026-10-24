@@ -193,3 +193,4 @@ def test_compact_table_shape():
     assert "1405" not in table and "میلیون" not in table
     assert "📈" in table and "📉" in table and "+" not in table
     assert "میلیون" in html.split("<table")[0]
+
