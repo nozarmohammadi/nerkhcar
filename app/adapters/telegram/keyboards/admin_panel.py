@@ -11,7 +11,8 @@ def _btn(text: str, data: str) -> list[InlineKeyboardButton]:
 def panel_kb(role: str) -> InlineKeyboardMarkup | None:
     if role != "owner":
         return None
-    return InlineKeyboardMarkup(inline_keyboard=[_btn(p.BTN_ADMINS, "adm:menu")])
+    rows = [_btn(p.BTN_ADMINS, "adm:menu"), _btn(p.BTN_LOG, "adm:log")]
+    return InlineKeyboardMarkup(inline_keyboard=rows)
 
 
 def manage_kb() -> InlineKeyboardMarkup:

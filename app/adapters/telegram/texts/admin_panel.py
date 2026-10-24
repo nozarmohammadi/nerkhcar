@@ -32,3 +32,17 @@ PICK_RESET = "رمز کدام ادمین ریست شود؟"
 LIST_ROW = "{uid} | {role} | {state}"
 STATE_ON = "فعال"
 STATE_OFF = "غیرفعال"
+BTN_LOG = "📜 لاگ ممیزی"
+LOG_TITLE = "📜 ۱۰ رویداد آخر (ساعت UTC):"
+LOG_EMPTY = "هنوز رویدادی ثبت نشده است."
+LOG_ROW = "{at} | {who} | {action} {detail}"
+ACTION_LABELS = dict([
+    ("owner_created", "👑 ساخت مالک"),
+    ("login_ok", "✅ ورود موفق"),
+    ("login_fail", "❌ ورود ناموفق"),
+    ("locked", "🔒 قفل ۱۵ دقیقه‌ای"),
+    ("admin_added", "➕ افزودن ادمین"),
+    ("admin_removed", "🗑 حذف ادمین"),
+    ("password_reset", "🔑 ریست رمز"),
+    ("password_set", "🔑 تعیین رمز"),
+])

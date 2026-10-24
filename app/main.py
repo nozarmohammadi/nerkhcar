@@ -6,7 +6,7 @@ from aiogram import Bot, Dispatcher
 from aiogram.types import ErrorEvent
 
 from app.adapters.telegram.handlers import (
-    admin_login, admin_manage, admin_panel, menu_stub, start,
+    admin_audit, admin_login, admin_manage, admin_panel, menu_stub, start,
 )
 from app.adapters.telegram.texts import menu
 from app.config import Settings, load_settings
@@ -40,6 +40,7 @@ def build_dispatcher(settings: Settings) -> Dispatcher:
     dp.include_router(admin_login.router)
     dp.include_router(admin_panel.router)
     dp.include_router(admin_manage.router)
+    dp.include_router(admin_audit.router)
     dp.include_router(menu_stub.router)
     dp.errors.register(on_error)
     return dp

@@ -146,4 +146,4 @@ def test_reset_password_shows_temp_and_forces_change(env):
 
 def test_only_owner_sees_manage_button():
     assert panel_kb("editor") is None
-    assert len(panel_kb("owner").inline_keyboard) == 1
+    assert len(panel_kb("owner").inline_keyboard) == 2
