@@ -37,6 +37,16 @@ def time_text(texts, now: datetime | None = None) -> str:
     return f"{now:%H:%M}".translate(str.maketrans("0123456789", texts.DIGITS))
 
 
+_FA = {ord(str(i)): chr(0x06F0 + i) for i in range(10)}
+_FA[ord(",")] = "\u066c"
+_FA[ord(".")] = "\u066b"
+
+
+def fa(value) -> str:
+    """رقم‌های لاتین را فارسی می‌کند (جداکننده هزارگان هم فارسی)."""
+    return str(value).translate(_FA)
+
+
 def _main_year(rows: list[dict]):
     common = Counter(r["year"] for r in rows).most_common(1)
     return common[0][0] if common else None
@@ -53,15 +63,15 @@ def _change(row: dict, up: str, down: str) -> str:
     if not value:
         return ""
     if value > 0:
-        return up.format(n=f"{value:g}")
-    return down.format(n=f"{-value:g}")
+        return up.format(n=fa(f"{value:g}"))
+    return down.format(n=fa(f"{-value:g}"))
 
 
 def build_text(rows: list[dict], day_text: str, texts) -> str:
     main = _main_year(rows)
     lines = [
         texts.LINE.format(
-            label=_label(r, main), price=f"{r['price_m']:,}",
+            label=_label(r, main), price=fa(f"{r['price_m']:,}"),
             change=_change(r, texts.CHANGE_UP, texts.CHANGE_DOWN),
         )
         for r in rows
@@ -89,7 +99,7 @@ def _cell(tag: str, value) -> str:
 
 def _html_row(row: dict, main, texts) -> str:
     change = _change(row, texts.CHANGE_UP, texts.CHANGE_DOWN).strip()
-    values = (_label(row, main), f"{row['price_m']:,}", change or texts.NO_VALUE)
+    values = (_label(row, main), fa(f"{row['price_m']:,}"), change or texts.NO_VALUE)
     return "<tr>" + "".join(_cell("td", v) for v in values) + "</tr>"
 
 
