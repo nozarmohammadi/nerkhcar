@@ -8,7 +8,9 @@ from aiogram.fsm.context import FSMContext
 from aiogram.fsm.state import State, StatesGroup
 from aiogram.types import Message
 
+from app.adapters.telegram.keyboards.admin_panel import panel_kb
 from app.adapters.telegram.texts import admin as t
+from app.adapters.telegram.texts import admin_panel as p
 from app.config import Settings
 from app.core import admin_auth as auth
 from app.core.password_policy import check_policy
@@ -63,7 +65,7 @@ async def on_admin(message: Message, state: FSMContext, settings: Settings) -> N
     if admin is None or not admin.is_active:
         return
     if auth.has_session(admin, datetime.now()):
-        await message.answer(t.PANEL_SOON)
+        await message.answer(p.PANEL_TITLE, reply_markup=panel_kb(admin.role))
     elif admin.pw_hash is None or admin.must_change:
         await state.set_state(Login.new_password)
         await message.answer(t.ASK_NEW_PASSWORD)
@@ -86,6 +88,8 @@ async def on_password(message: Message, state: FSMContext, settings: Settings) -
     if result.status != "wrong":
         await state.clear()
     await _reply(message, result)
+    if result.status == "ok":
+        await message.answer(p.PANEL_TITLE, reply_markup=panel_kb(admin.role))
     if result.status == "now_locked":
         alert = t.OWNER_ALERT.format(uid=uid)
         await message.bot.send_message(settings.owner_id, alert)
