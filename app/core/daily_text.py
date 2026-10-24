@@ -1,6 +1,7 @@
 """ساخت خروجی قیمت روز (متن و جدول) و جمع‌کردن ردیف‌ها. بدون تلگرام."""
 from collections import Counter
-from datetime import date
+from datetime import date, datetime
+from zoneinfo import ZoneInfo
 from html import escape
 
 from app.core import jalali, ref_import
@@ -28,6 +29,12 @@ def date_text(texts, today: date | None = None) -> str:
     jy, jm, jd = jalali.to_jalali(today.year, today.month, today.day)
     text = f"{jd} {texts.MONTHS[jm - 1]} {jy}"
     return text.translate(str.maketrans("0123456789", texts.DIGITS))
+
+
+def time_text(texts, now: datetime | None = None) -> str:
+    """ساعت به وقت تهران با رقم فارسی، مثل «۱۵:۴۲»."""
+    now = now or datetime.now(ZoneInfo("Asia/Tehran"))
+    return f"{now:%H:%M}".translate(str.maketrans("0123456789", texts.DIGITS))
 
 
 def _main_year(rows: list[dict]):
@@ -86,15 +93,17 @@ def _html_row(row: dict, main, texts) -> str:
     return "<tr>" + "".join(_cell("td", v) for v in values) + "</tr>"
 
 
-def build_html(rows: list[dict], day_text: str, texts) -> str:
+def build_html(
+    rows: list[dict], day_text: str, texts, now: datetime | None = None
+) -> str:
     main = _main_year(rows)
     head = "<tr>" + "".join(_cell("th", h) for h in texts.TBL_HEAD) + "</tr>"
     body = "".join(_html_row(r, main, texts) for r in rows)
     top = (
         f"<p><b>{escape(texts.TBL_TITLE)}</b></p>"
-        f"<p>{escape(texts.DATE_LINE.format(date=day_text))}</p>"
+        f"<p>{escape(texts.DATE_LINE.format(date=day_text, time=time_text(texts, now)))}</p>"
         f"<p>{escape(texts.UNIT)}</p>"
     )
     foot = f"<p>{escape(texts.FOOT.strip())}</p>"
-    table = "<table bordered striped compact>" + head + body + "</table>"
+    table = "<table bordered striped>" + head + body + "</table>"
     return top + table + foot

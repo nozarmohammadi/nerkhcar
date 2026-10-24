@@ -111,7 +111,7 @@ def test_merge_drops_blocked_and_replaces_duplicates():
 
 def test_build_text_has_prices_and_arrows():
     text = daily_text.build_text(_ready_rows(), "2026-10-24", t)
-    assert "1,810" in text and "🟢" in text and "🔴" in text
+    assert "1,810" in text and "📈" in text and "📉" in text
     assert "ساینا اتومات" not in text and "2026-10-24" in text
 
 
@@ -120,7 +120,7 @@ def test_html_table_escapes_and_has_header():
              "change_m": 5.0, "flags": []}]
     html = daily_text.build_html(rows, "2026-10-24", t)
     assert "<table" in html and "a&lt;b" in html and "1,810" in html
-    assert t.TBL_HEAD[0] in html and "🟢" in html
+    assert t.TBL_HEAD[0] in html and "📈" in html
 
 
 def test_text_chunks_limit():
@@ -184,5 +184,5 @@ def test_compact_table_shape():
     html = daily_text.build_html(_ready_rows(), "d", t)
     table = html.split("<table")[1].split("</table>")[0]
     assert "1405" not in table and "میلیون" not in table
-    assert "▲" in table and "▼" in table and "+" not in table
+    assert "📈" in table and "📉" in table and "+" not in table
     assert "میلیون" in html.split("<table")[0]
