@@ -5,9 +5,10 @@ import logging
 from aiogram import Bot, Dispatcher
 from aiogram.types import ErrorEvent
 
-from app.adapters.telegram.handlers import menu_stub, start
+from app.adapters.telegram.handlers import admin_login, menu_stub, start
 from app.adapters.telegram.texts import menu
-from app.config import load_settings
+from app.config import Settings, load_settings
+from app.data import db, repo_admins, repo_audit
 from app.logging_setup import setup_logging
 
 log = logging.getLogger("nerkhcar")
@@ -21,9 +22,20 @@ async def on_error(event: ErrorEvent) -> bool:
     return True
 
 
-def build_dispatcher() -> Dispatcher:
-    dp = Dispatcher()
+def prepare_db(settings: Settings) -> None:
+    db.migrate(settings.db_path, settings.db_path.parent.parent / "backups")
+    conn = db.connect(settings.db_path)
+    try:
+        if repo_admins.ensure_owner(conn, settings.owner_id):
+            repo_audit.add_entry(conn, None, "owner_created")
+    finally:
+        conn.close()
+
+
+def build_dispatcher(settings: Settings) -> Dispatcher:
+    dp = Dispatcher(settings=settings)
     dp.include_router(start.router)
+    dp.include_router(admin_login.router)
     dp.include_router(menu_stub.router)
     dp.errors.register(on_error)
     return dp
@@ -32,9 +44,10 @@ def build_dispatcher() -> Dispatcher:
 async def main() -> None:
     settings = load_settings()
     setup_logging(settings.log_dir)
+    prepare_db(settings)
     bot = Bot(token=settings.bot_token)
     log.info("ربات در حال شروع است")
-    await build_dispatcher().start_polling(bot)
+    await build_dispatcher(settings).start_polling(bot)
 
 
 if __name__ == "__main__":
