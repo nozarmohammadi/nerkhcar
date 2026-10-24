@@ -127,7 +127,7 @@ async def on_photo(
             error = t.READ_ERRORS.get(status, t.READ_ERROR_GENERIC)
             await _show(bot, message, state, error)
             return
-        total = daily_text.merge_rows(data["rows"], rows)
+        total = daily_text.merge_rows(data["rows"], rows, number)
         await state.update_data(rows=total, photos=number)
         daily_draft.save_if_open(settings, data, total, number)
         await _show(bot, message, state, t.GOT.format(

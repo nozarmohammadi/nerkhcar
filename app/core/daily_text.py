@@ -10,11 +10,15 @@ CHUNK_CHARS = 3800
 MIN_NAME = 34
 
 
-def merge_rows(old: list[dict], new: list[dict]) -> list[dict]:
+def merge_rows(
+    old: list[dict], new: list[dict], photo: int | None = None
+) -> list[dict]:
     """ردیف‌های سالم را اضافه می‌کند؛ تکراری (نام و سال) را با تازه‌تر عوض می‌کند."""
     ready, _ = ref_import.split_rows(new)
     index = {(r["name"], r["year"]): i for i, r in enumerate(old)}
     for row in ready:
+        if photo is not None:
+            row["photo"] = photo
         key = (row["name"], row["year"])
         if key in index:
             old[index[key]] = row
@@ -134,3 +138,11 @@ def table_rows(rows: list[dict], texts) -> list[tuple[str, str, str, int]]:
             change or texts.NO_VALUE, (value > 0) - (value < 0),
         ))
     return cells
+
+
+def group_rows(rows: list[dict]) -> list[list[dict]]:
+    """Split rows into one list per source photo, in photo order."""
+    groups: dict[int, list[dict]] = {}
+    for row in rows:
+        groups.setdefault(row.get("photo") or 0, []).append(row)
+    return [groups[key] for key in sorted(groups)]

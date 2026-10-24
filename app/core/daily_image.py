@@ -110,3 +110,13 @@ def render(
     out = BytesIO()
     img.save(out, "PNG", optimize=True)
     return out.getvalue()
+
+
+def render_all(
+    rows: list[dict], day_text: str, texts, now: datetime | None = None
+) -> list[bytes]:
+    """One PNG per source photo, so the slide count matches the photos sent."""
+    return [
+        render(group, day_text, texts, now)
+        for group in daily_text.group_rows(rows)
+    ]
