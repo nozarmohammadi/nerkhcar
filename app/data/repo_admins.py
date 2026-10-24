@@ -17,3 +17,19 @@ def add_admin(
         (tg_id, role, pw_hash),
     )
     conn.commit()
+
+
+def ensure_owner(conn: sqlite3.Connection, owner_id: int) -> bool:
+    """مالک را از .env ثبت می‌کند (بدون رمز). اگر تازه ساخته شد True."""
+    if get_admin(conn, owner_id):
+        return False
+    add_admin(conn, owner_id, "owner")
+    return True
+
+
+def set_password(conn: sqlite3.Connection, tg_id: int, pw_hash: str) -> None:
+    conn.execute(
+        "UPDATE admins SET pw_hash=?, must_change=0, failed_count=0 WHERE tg_id=?",
+        (pw_hash, tg_id),
+    )
+    conn.commit()
