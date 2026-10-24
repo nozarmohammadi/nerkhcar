@@ -40,3 +40,23 @@ def test_other_admin_does_not_see_it(tmp_path):
 
 def test_today_is_iso_date():
     assert len(daily_draft.today()) == 10
+
+
+def test_save_if_open_writes_rows(tmp_path):
+    s = _settings(tmp_path)
+    batch = daily_draft.start(s, 7)
+    daily_draft.save_if_open(s, {"batch_id": batch}, ROWS, 3)
+    assert daily_draft.find_today(s, 7)["photos"] == 3
+
+
+def test_save_if_open_without_batch_does_nothing(tmp_path):
+    s = _settings(tmp_path)
+    daily_draft.save_if_open(s, {}, ROWS, 3)
+    assert daily_draft.find_today(s, 7) is None
+
+
+def test_close_if_open_marks_sent(tmp_path):
+    s = _settings(tmp_path)
+    batch = daily_draft.start(s, 7)
+    daily_draft.close_if_open(s, {"batch_id": batch}, "sent")
+    assert daily_draft.find_today(s, 7) is None

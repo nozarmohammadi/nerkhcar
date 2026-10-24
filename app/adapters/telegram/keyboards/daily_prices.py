@@ -16,3 +16,12 @@ def collect_kb() -> InlineKeyboardMarkup:
 def result_kb() -> InlineKeyboardMarkup:
     rows = [_btn(t.BTN_PIC, "dp:pic"), _btn(t.BTN_VIDEO, "dp:vid")]
     return InlineKeyboardMarkup(inline_keyboard=rows)
+
+
+def resume_kb() -> InlineKeyboardMarkup:
+    rows = [
+        _btn(t.BTN_RESUME, "dp:resume"),
+        _btn(t.BTN_FRESH, "dp:fresh"),
+        _btn(t.BTN_CANCEL, "dp:x"),
+    ]
+    return InlineKeyboardMarkup(inline_keyboard=rows)

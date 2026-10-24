@@ -5,11 +5,12 @@ import logging
 from aiogram import Bot, F, Router
 from aiogram.exceptions import TelegramBadRequest
 from aiogram.fsm.context import FSMContext
-from aiogram.fsm.state import State, StatesGroup
 from aiogram.types import CallbackQuery, Message
 
 from app.adapters.ai import gemini
-from app.adapters.telegram import daily_send
+from app.adapters.telegram import daily_draft, daily_send
+from app.adapters.telegram.handlers import daily_resume
+from app.adapters.telegram.handlers.daily_state import Daily
 from app.adapters.telegram.guard import active_admin
 from app.adapters.telegram.keyboards import daily_prices as k
 from app.adapters.telegram.texts import daily_prices as t
@@ -24,10 +25,6 @@ router.message.filter(F.chat.type == "private")
 router.callback_query.filter(F.message.chat.type == "private")
 MAX_BYTES = 8 * 1024 * 1024
 _LOCKS: dict[int, asyncio.Lock] = {}
-
-
-class Daily(StatesGroup):
-    photos = State()
 
 
 def _lock(user_id: int) -> asyncio.Lock:
@@ -99,10 +96,7 @@ async def on_start(cb: CallbackQuery, state: FSMContext, settings: Settings) -> 
     if not settings.gemini_key:
         await cb.answer(t.READ_ERRORS["no_key"], show_alert=True)
         return
-    await state.clear()
-    await state.set_state(Daily.photos)
-    await state.update_data(rows=[], photos=0)
-    await cb.message.answer(t.ASK_PHOTOS, reply_markup=k.collect_kb())
+    await daily_resume.entry(cb, state, settings)
     await cb.answer()
 
 
@@ -135,6 +129,7 @@ async def on_photo(
             return
         total = daily_text.merge_rows(data["rows"], rows)
         await state.update_data(rows=total, photos=number)
+        daily_draft.save_if_open(settings, data, total, number)
         await _show(bot, message, state, t.GOT.format(
             photos=number, rows=len(total),
             usage=_usage_line(settings)))
@@ -149,7 +144,8 @@ async def on_done(
         await cb.answer()
         return
     async with _lock(cb.from_user.id):
-        rows = (await state.get_data())["rows"]
+        data = await state.get_data()
+        rows = data["rows"]
         if not rows:
             await cb.message.answer(t.NOTHING)
             await cb.answer()
@@ -158,6 +154,7 @@ async def on_done(
             bot, cb.message.chat.id, rows, daily_text.date_text(t),
             k.result_kb())
         await cb.message.edit_text(t.FINISHED.format(rows=len(rows)))
+        daily_draft.close_if_open(settings, data, "sent")
     await cb.answer()
 
 
