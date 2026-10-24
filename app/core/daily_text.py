@@ -120,3 +120,17 @@ def build_html(
     foot = f"<p>{escape(texts.FOOT.strip())}</p>"
     table = "<table bordered striped>" + head + body + "</table>"
     return top + table + foot
+
+
+def table_rows(rows: list[dict], texts) -> list[tuple[str, str, str, int]]:
+    """Plain cells for image output: label, price, change text, direction."""
+    main = _main_year(rows)
+    cells = []
+    for row in rows:
+        value = row.get("change_m") or 0
+        change = _change(row, texts.CHANGE_UP, texts.CHANGE_DOWN).strip()
+        cells.append((
+            _label(row, main), fa(f"{row['price_m']:,}"),
+            change or texts.NO_VALUE, (value > 0) - (value < 0),
+        ))
+    return cells
