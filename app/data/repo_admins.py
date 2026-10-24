@@ -45,3 +45,27 @@ def save_auth_state(
         (failed_count, locked_until, session_until, tg_id),
     )
     conn.commit()
+
+
+def set_temp_password(conn: sqlite3.Connection, tg_id: int, pw_hash: str) -> None:
+    conn.execute(
+        "UPDATE admins SET pw_hash=?, must_change=1, failed_count=0, "
+        "locked_until=NULL, session_until=NULL WHERE tg_id=?",
+        (pw_hash, tg_id),
+    )
+    conn.commit()
+
+
+def set_active(conn: sqlite3.Connection, tg_id: int, active: bool) -> None:
+    conn.execute(
+        "UPDATE admins SET is_active=?, session_until=NULL WHERE tg_id=?",
+        (1 if active else 0, tg_id),
+    )
+    conn.commit()
+
+
+def list_admins(conn: sqlite3.Connection) -> list[dict]:
+    rows = conn.execute(
+        "SELECT tg_id, role, is_active FROM admins ORDER BY created_at"
+    ).fetchall()
+    return [dict(r) for r in rows]
