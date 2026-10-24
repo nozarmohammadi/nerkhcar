@@ -118,7 +118,7 @@ def test_merge_drops_blocked_and_replaces_duplicates():
 
 def test_build_text_has_prices_and_arrows():
     text = daily_text.build_text(_ready_rows(), "2026-10-24", t)
-    assert "۱٬۸۱۰" in text and "📈" in text and "📉" in text
+    assert "۱,۸۱۰" in text and "📈" in text and "📉" in text
     assert "ساینا اتومات" not in text and "2026-10-24" in text
 
 
@@ -126,7 +126,7 @@ def test_html_table_escapes_and_has_header():
     rows = [{"name": "a<b", "year": 1405, "price_m": 1810,
              "change_m": 5.0, "flags": []}]
     html = daily_text.build_html(rows, "2026-10-24", t)
-    assert "<table" in html and "a&lt;b" in html and "۱٬۸۱۰" in html
+    assert "<table" in html and "a&lt;b" in html and "۱,۸۱۰" in html
     assert t.TBL_HEAD[0] in html and "📈" in html
 
 

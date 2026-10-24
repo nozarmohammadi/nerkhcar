@@ -39,12 +39,11 @@ def time_text(texts, now: datetime | None = None) -> str:
 
 
 _FA = {ord(str(i)): chr(0x06F0 + i) for i in range(10)}
-_FA[ord(",")] = "\u066c"
 _FA[ord(".")] = "\u066b"
 
 
 def fa(value) -> str:
-    """رقم‌های لاتین را فارسی می‌کند (جداکننده هزارگان هم فارسی)."""
+    """Latin digits to Persian digits; the thousands comma stays as is."""
     return str(value).translate(_FA)
 
 
