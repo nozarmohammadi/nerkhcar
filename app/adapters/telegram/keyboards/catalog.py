@@ -2,6 +2,7 @@
 from aiogram.types import InlineKeyboardButton, InlineKeyboardMarkup
 
 from app.adapters.telegram.texts import catalog as c
+from app.adapters.telegram.texts import price_import as pi
 
 
 def _btn(text: str, data: str) -> list[InlineKeyboardButton]:
@@ -21,6 +22,7 @@ def brands_kb(brands: list[dict]) -> InlineKeyboardMarkup:
 def models_kb(brand_id: int, models: list[dict]) -> InlineKeyboardMarkup:
     rows = [_btn(m["name"], f"cat:m:{m['id']}") for m in models]
     rows += [_btn(c.BTN_NEW_MODEL, f"cat:nm:{brand_id}"),
+             _btn(pi.BTN_IMPORT, f"pi:{brand_id}"),
              _btn(c.BTN_BACK, "adm:cat")]
     return _kb(rows)
 

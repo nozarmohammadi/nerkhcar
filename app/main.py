@@ -7,7 +7,7 @@ from aiogram.types import ErrorEvent
 
 from app.adapters.telegram.handlers import (
     admin_audit, admin_catalog, admin_login, admin_manage, admin_panel,
-    menu_stub, start,
+    menu_stub, price_import, start,
 )
 from app.adapters.telegram.texts import menu
 from app.config import Settings, load_settings
@@ -15,6 +15,12 @@ from app.data import db, repo_admins, repo_audit
 from app.logging_setup import setup_logging
 
 log = logging.getLogger("nerkhcar")
+
+# ترتیب مهم است: menu_stub باید آخر باشد
+ROUTER_MODULES = (
+    start, admin_login, admin_panel, admin_manage, admin_audit,
+    admin_catalog, price_import, menu_stub,
+)
 
 
 async def on_error(event: ErrorEvent) -> bool:
@@ -37,13 +43,8 @@ def prepare_db(settings: Settings) -> None:
 
 def build_dispatcher(settings: Settings) -> Dispatcher:
     dp = Dispatcher(settings=settings)
-    dp.include_router(start.router)
-    dp.include_router(admin_login.router)
-    dp.include_router(admin_panel.router)
-    dp.include_router(admin_manage.router)
-    dp.include_router(admin_audit.router)
-    dp.include_router(admin_catalog.router)
-    dp.include_router(menu_stub.router)
+    for module in ROUTER_MODULES:
+        dp.include_router(module.router)
     dp.errors.register(on_error)
     return dp
 
