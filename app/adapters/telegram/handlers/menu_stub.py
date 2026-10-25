@@ -5,7 +5,7 @@ from aiogram.types import Message
 from app.adapters.telegram.texts import menu
 
 router = Router()
-BUTTONS = {menu.BTN_FX_GOLD, menu.BTN_MY_CAR}
+BUTTONS = {menu.BTN_MY_CAR}
 
 
 @router.message(F.text.in_(BUTTONS))
