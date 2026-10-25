@@ -160,11 +160,6 @@ async def on_done(
     await cb.answer()
 
 
-@router.callback_query(F.data == "dp:vid")
-async def on_soon(cb: CallbackQuery) -> None:
-    await cb.answer(t.SOON, show_alert=True)
-
-
 @router.callback_query(F.data == "dp:x")
 async def on_cancel(cb: CallbackQuery, state: FSMContext) -> None:
     await state.clear()

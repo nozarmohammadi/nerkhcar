@@ -7,8 +7,8 @@ from aiogram.types import ErrorEvent
 
 from app.adapters.telegram.handlers import (
     admin_audit, admin_catalog, admin_login, admin_manage, admin_panel,
-    car_price, daily_image, daily_prices, daily_resume, fx_price,
-    menu_stub, price_import, start,
+    car_price, daily_image, daily_prices, daily_resume, daily_video,
+    fx_price, menu_stub, price_import, start,
 )
 from app.adapters.telegram.texts import menu
 from app.config import Settings, load_settings
@@ -20,8 +20,8 @@ log = logging.getLogger("nerkhcar")
 # ترتیب مهم است: menu_stub باید آخر باشد
 ROUTER_MODULES = (
     start, admin_login, admin_panel, admin_manage, admin_audit,
-    admin_catalog, price_import, daily_prices, daily_image, daily_resume,
-    car_price, fx_price, menu_stub,
+    admin_catalog, price_import, daily_prices, daily_image, daily_video,
+    daily_resume, car_price, fx_price, menu_stub,
 )
 
 

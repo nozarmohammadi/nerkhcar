@@ -95,21 +95,30 @@ def _draw_foot(draw, height: int, texts) -> None:
           _font(False, 28), MUTED, "mm")
 
 
+def draw_frame(
+    cells: list, shown: int, day_text: str, texts,
+    now: datetime | None, height: int,
+) -> Image.Image:
+    """Draw header, the first `shown` rows and the footer on one canvas."""
+    img = Image.new("RGB", (WIDTH, height), BG)
+    draw = ImageDraw.Draw(img)
+    _draw_top(draw, day_text, texts, now)
+    _draw_head(draw, texts)
+    y = TOP_H + HEAD_H
+    for index, row in enumerate(cells[:shown]):
+        _draw_row(draw, y, row, index)
+        y += ROW_H
+    _draw_foot(draw, height, texts)
+    return img
+
+
 def render(
     rows: list[dict], day_text: str, texts, now: datetime | None = None
 ) -> bytes:
     """Return PNG bytes of the price table; height grows with row count."""
     cells = daily_cols.cells(rows, texts, image=True)
     height = max(MIN_HEIGHT, TOP_H + HEAD_H + ROW_H * len(cells) + FOOT_H)
-    img = Image.new("RGB", (WIDTH, height), BG)
-    draw = ImageDraw.Draw(img)
-    _draw_top(draw, day_text, texts, now)
-    _draw_head(draw, texts)
-    y = TOP_H + HEAD_H
-    for index, row in enumerate(cells):
-        _draw_row(draw, y, row, index)
-        y += ROW_H
-    _draw_foot(draw, height, texts)
+    img = draw_frame(cells, len(cells), day_text, texts, now, height)
     out = BytesIO()
     img.save(out, "PNG", optimize=True)
     return out.getvalue()
