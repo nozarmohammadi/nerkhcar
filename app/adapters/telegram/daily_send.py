@@ -1,5 +1,6 @@
 """فرستادن جدول قیمت روز: اول جدول بومی تلگرام، در صورت خطا متن فشرده."""
 import logging
+from datetime import datetime
 
 from aiogram import Bot
 from aiogram.exceptions import TelegramAPIError
@@ -23,10 +24,10 @@ async def _send_text(
 
 async def send_table(
     bot: Bot, chat_id: int, rows: list[dict], date: str,
-    markup: InlineKeyboardMarkup | None,
+    markup: InlineKeyboardMarkup | None, now: datetime | None = None,
 ) -> str:
     """نتیجه: rich (جدول بومی) یا text (متن فشرده)."""
-    html = daily_text.build_html(rows, date, t)
+    html = daily_text.build_html(rows, date, t, now)
     try:
         await bot.send_rich_message(
             chat_id=chat_id, reply_markup=markup,

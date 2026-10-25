@@ -155,6 +155,7 @@ async def on_done(
             k.result_kb())
         await cb.message.edit_text(t.FINISHED.format(rows=len(rows)))
         daily_draft.close_if_open(settings, data, "sent")
+        daily_draft.publish(settings, rows)
     await cb.answer()
 
 

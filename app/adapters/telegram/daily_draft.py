@@ -6,7 +6,7 @@ from zoneinfo import ZoneInfo
 
 from app.adapters.telegram import dbrun
 from app.config import Settings
-from app.data import repo_daily
+from app.data import repo_daily, repo_published
 
 log = logging.getLogger("nerkhcar")
 
@@ -51,3 +51,11 @@ def close_if_open(settings: Settings, data: dict, status: str) -> None:
         close(settings, batch_id, status)
     except sqlite3.Error as exc:
         log.warning("draft close failed: %s", type(exc).__name__)
+
+
+def publish(settings: Settings, rows: list) -> None:
+    """Keep the published table for users; a DB error must not stop the flow."""
+    try:
+        dbrun.run(settings, repo_published.replace, today(), rows)
+    except sqlite3.Error as exc:
+        log.warning("publish save failed: %s", type(exc).__name__)

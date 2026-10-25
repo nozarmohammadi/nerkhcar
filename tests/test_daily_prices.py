@@ -166,7 +166,11 @@ def test_done_sends_one_table(monkeypatch):
     state, bot, sent = FakeState(), FakeBot(), []
     state.data = {"rows": _ready_rows()}
     cb = FakeCb(sent)
+    published = []
+    monkeypatch.setattr(
+        h.daily_draft, "publish", lambda s, rows: published.append(rows))
     asyncio.run(h.on_done(cb, state, SimpleNamespace(), bot))
+    assert published == [state.data["rows"]]
     assert len(bot.rich) == 1
     assert "<table" in bot.rich[0]["rich_message"].html
     assert cb.message.edited == [t.FINISHED.format(rows=2)]
