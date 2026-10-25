@@ -1,6 +1,7 @@
 """Daily 1car.ir download: poll inside a time window until the page is new."""
 import asyncio
 import logging
+import random
 from datetime import datetime
 from zoneinfo import ZoneInfo
 
@@ -38,4 +39,5 @@ async def loop() -> None:
                 log.info("car price poll: %s", await run_once(today))
         except Exception as exc:
             log.warning("car price job error: %s", type(exc).__name__)
-        await asyncio.sleep(sched.INTERVAL_MIN * 60)
+        wait = sched.INTERVAL_MIN + random.uniform(-sched.JITTER_MIN, sched.JITTER_MIN)
+        await asyncio.sleep(wait * 60)

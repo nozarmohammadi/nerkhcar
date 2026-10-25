@@ -5,7 +5,8 @@ from app.core import jalali
 
 START_HOUR = 9
 END_HOUR = 18
-INTERVAL_MIN = 15
+INTERVAL_MIN = 30
+JITTER_MIN = 7
 FRIDAY = 4
 
 
