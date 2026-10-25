@@ -8,10 +8,16 @@ from pathlib import Path
 import pytest
 from PIL import Image
 
-from app.adapters import video_ffmpeg
+from app.adapters import music_store, video_ffmpeg
 
 pytestmark = pytest.mark.skipif(
     shutil.which("ffmpeg") is None, reason="ffmpeg not installed")
+
+
+@pytest.fixture(autouse=True)
+def no_music(tmp_path, monkeypatch):
+    """Keep these tests silent and independent of the real music file."""
+    monkeypatch.setattr(music_store, "MUSIC_PATH", tmp_path / "none.mp3")
 
 
 def _png(color: tuple) -> bytes:

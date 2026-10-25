@@ -19,13 +19,16 @@ PAGE_HOLD_SEC = 1.2
 END_HOLD_SEC = 3.0
 
 
-def split_pages(cells: list) -> list[list]:
-    """Split cells into the fewest pages, as even as possible."""
-    if not cells:
-        return []
-    count = -(-len(cells) // PAGE_ROWS)
-    size = -(-len(cells) // count)
-    return [cells[i:i + size] for i in range(0, len(cells), size)]
+def split_pages(groups: list[list]) -> list[list]:
+    """One page per source photo; a group over PAGE_ROWS splits evenly."""
+    pages = []
+    for group in groups:
+        if not group:
+            continue
+        count = -(-len(group) // PAGE_ROWS)
+        size = -(-len(group) // count)
+        pages += [group[i:i + size] for i in range(0, len(group), size)]
+    return pages
 
 
 def frame_plan(pages: list[list]) -> list[tuple[int, int, float]]:
@@ -52,9 +55,11 @@ def render_frames(
     rows: list[dict], day_text: str, texts, now: datetime | None = None
 ) -> Iterator[tuple[bytes, float]]:
     """Yield (PNG bytes, seconds) one frame at a time to keep memory low."""
-    ordered = [r for g in daily_text.group_rows(rows) for r in g]
-    cells = daily_cols.cells(ordered, texts, image=True)
-    pages = split_pages(cells)
+    groups = [
+        daily_cols.cells(group, texts, image=True)
+        for group in daily_text.group_rows(rows)
+    ]
+    pages = split_pages(groups)
     for page, shown, seconds in frame_plan(pages):
         img = daily_image.draw_frame(
             pages[page], shown, day_text, texts, now, CANVAS_H)
