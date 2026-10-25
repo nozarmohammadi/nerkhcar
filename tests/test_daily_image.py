@@ -27,7 +27,7 @@ def test_table_rows_directions():
     cells = daily_cols.cells(ROWS, t)
     assert [c[4] for c in cells] == [1, 0, -1]
     assert cells[1][3] == t.NO_VALUE
-    assert "\u2b07" in cells[2][3]
+    assert "\u25bc" in cells[2][3]
     img = daily_cols.cells(ROWS, t, image=True)
     assert "\u25bc" in img[2][3] and "\u25b2" in img[0][3]
     assert cells[0][1] == "\u06f1\u06f4\u06f0\u06f5"
