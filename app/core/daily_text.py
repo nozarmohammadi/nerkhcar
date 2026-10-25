@@ -7,6 +7,7 @@ from html import escape
 from app.core import jalali, ref_import
 
 CHUNK_CHARS = 3800
+MIN_NAME = 16
 
 
 def merge_rows(
@@ -102,7 +103,9 @@ def _cell(tag: str, value) -> str:
 
 def _html_row(cell: tuple, texts) -> str:
     values = cell[:4]
-    cells = [_cell("td", v) for v in values]
+    pad = "&nbsp;" * max(0, MIN_NAME - len(str(values[0])))
+    cells = [f"<td>{escape(str(values[0]))}{pad}</td>"]
+    cells += [_cell("td", v) for v in values[1:]]
     return "<tr>" + "".join(cells) + "</tr>"
 
 
@@ -118,7 +121,7 @@ def build_html(
         f"<p>{escape(texts.UNIT)}</p>"
     )
     foot = f"<p>{escape(texts.FOOT.strip())}</p>"
-    table = "<table bordered striped compact>" + head + body + "</table>"
+    table = "<table bordered striped>" + head + body + "</table>"
     return top + table + foot
 
 
