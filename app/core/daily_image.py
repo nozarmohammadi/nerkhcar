@@ -99,7 +99,7 @@ def render(
     rows: list[dict], day_text: str, texts, now: datetime | None = None
 ) -> bytes:
     """Return PNG bytes of the price table; height grows with row count."""
-    cells = daily_cols.cells(rows, texts)
+    cells = daily_cols.cells(rows, texts, image=True)
     height = max(MIN_HEIGHT, TOP_H + HEAD_H + ROW_H * len(cells) + FOOT_H)
     img = Image.new("RGB", (WIDTH, height), BG)
     draw = ImageDraw.Draw(img)

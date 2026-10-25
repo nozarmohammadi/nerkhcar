@@ -2,8 +2,10 @@
 from app.core import daily_text
 
 
-def change_text(row: dict, texts) -> str:
-    return daily_text._change(row, texts.CHANGE_UP, texts.CHANGE_DOWN).strip()
+def change_text(row: dict, texts, image: bool = False) -> str:
+    up = texts.IMG_UP if image else texts.CHANGE_UP
+    down = texts.IMG_DOWN if image else texts.CHANGE_DOWN
+    return daily_text._change(row, up, down).strip()
 
 
 def year_text(row: dict, texts) -> str:
@@ -11,12 +13,14 @@ def year_text(row: dict, texts) -> str:
     return texts.NO_VALUE if year is None else daily_text.fa(year)
 
 
-def cells(rows: list[dict], texts) -> list[tuple[str, str, str, str, int]]:
+def cells(
+    rows: list[dict], texts, image: bool = False
+) -> list[tuple[str, str, str, str, int]]:
     """Cells: name, year, price, change text, direction (-1, 0, 1)."""
     out = []
     for row in rows:
         value = row.get("change_m") or 0
-        change = change_text(row, texts)
+        change = change_text(row, texts, image)
         out.append((
             row["name"], year_text(row, texts),
             daily_text.fa(f"{row['price_m']:,}"),
