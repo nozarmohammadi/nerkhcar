@@ -6,7 +6,7 @@ from pathlib import Path
 
 from PIL import Image, ImageDraw, ImageFont
 
-from app.core import daily_text
+from app.core import daily_cols, daily_text
 
 FONT_DIR = Path(__file__).resolve().parents[2] / "assets" / "fonts"
 WIDTH = 1080
@@ -17,7 +17,8 @@ HEAD_H = 72
 ROW_H = 66
 FOOT_H = 88
 NAME_X = WIDTH - PAD - 24
-NAME_W = 480
+NAME_W = 400
+YEAR_X = 590
 PRICE_X = 400
 CHANGE_X = 160
 BG = (244, 246, 251)
@@ -67,21 +68,23 @@ def _draw_head(draw, texts) -> None:
     draw.rounded_rectangle(
         [PAD, TOP_H, WIDTH - PAD, TOP_H + HEAD_H], radius=16, fill=NAVY,
         corners=(True, True, False, False))
-    name, price, change = texts.TBL_HEAD
+    name, year, price, change = texts.TBL_HEAD
     mid = TOP_H + HEAD_H // 2
     font = _font(True, 32)
     _text(draw, (NAME_X, mid), name, font, WHITE, "rm")
+    _text(draw, (YEAR_X, mid), year, font, WHITE, "mm")
     _text(draw, (PRICE_X, mid), price, font, WHITE, "mm")
     _text(draw, (CHANGE_X, mid), change, font, WHITE, "mm")
 
 
 def _draw_row(draw, y: int, cells: tuple, index: int) -> None:
-    label, price, change, direction = cells
+    label, year, price, change, direction = cells
     draw.rectangle(
         [PAD, y, WIDTH - PAD, y + ROW_H - 1], fill=ROW_COLORS[index % 2])
     mid = y + ROW_H // 2
     font = _fit(draw, label, 32, NAME_W)
     _text(draw, (NAME_X, mid), label, font, INK, "rm")
+    _text(draw, (YEAR_X, mid), year, _font(True, 32), INK, "mm")
     _text(draw, (PRICE_X, mid), price, _font(True, 34), INK, "mm", "ltr")
     color = (MUTED, UP, DOWN)[direction]  # direction -1 picks DOWN
     _text(draw, (CHANGE_X, mid), change, _font(True, 32), color, "mm", "ltr")
@@ -96,7 +99,7 @@ def render(
     rows: list[dict], day_text: str, texts, now: datetime | None = None
 ) -> bytes:
     """Return PNG bytes of the price table; height grows with row count."""
-    cells = daily_text.table_rows(rows, texts)
+    cells = daily_cols.cells(rows, texts)
     height = max(MIN_HEIGHT, TOP_H + HEAD_H + ROW_H * len(cells) + FOOT_H)
     img = Image.new("RGB", (WIDTH, height), BG)
     draw = ImageDraw.Draw(img)

@@ -2,7 +2,7 @@
 import sqlite3
 
 from app.core import table_parse
-from app.data import repo_audit, repo_catalog, repo_refs
+from app.data import repo_audit, repo_catalog, repo_prices_tx, repo_refs
 
 BLOCKING = {"no_name", "no_year", "no_price", "bad_year", "range", "bad_row"}
 
@@ -55,6 +55,7 @@ def _save_one(
     trim_id = repo_refs.ensure_trim(conn, model_id, trim_name)
     price = row["price_m"]
     repo_refs.add_reference(conn, trim_id, row["year"], source, price, price, admin_id)
+    repo_prices_tx.sync_price(conn, trim_id, row["year"], price, admin_id)
 
 
 def save_references(

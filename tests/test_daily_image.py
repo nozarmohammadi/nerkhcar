@@ -4,7 +4,7 @@ from io import BytesIO
 from PIL import Image, features
 
 from app.adapters.telegram.texts import daily_prices as t
-from app.core import daily_image, daily_text
+from app.core import daily_cols, daily_image
 
 NAME = "\u067e\u0698\u0648 207"
 ROWS = [
@@ -24,10 +24,11 @@ def test_raqm_available():
 
 
 def test_table_rows_directions():
-    cells = daily_text.table_rows(ROWS, t)
-    assert [c[3] for c in cells] == [1, 0, -1]
-    assert cells[1][2] == t.NO_VALUE
-    assert "\u2212" in cells[2][2]
+    cells = daily_cols.cells(ROWS, t)
+    assert [c[4] for c in cells] == [1, 0, -1]
+    assert cells[1][3] == t.NO_VALUE
+    assert "\u2212" in cells[2][3]
+    assert cells[0][1] == "\u06f1\u06f4\u06f0\u06f5"
 
 
 def test_render_size_and_format():

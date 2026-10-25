@@ -101,9 +101,8 @@ def _cell(tag: str, value) -> str:
     return f"<{tag}>{escape(str(value))}</{tag}>"
 
 
-def _html_row(row: dict, main, texts) -> str:
-    change = _change(row, texts.CHANGE_UP, texts.CHANGE_DOWN).strip()
-    values = (_label(row, main), fa(f"{row['price_m']:,}"), change or texts.NO_VALUE)
+def _html_row(cell: tuple, texts) -> str:
+    values = cell[:4]
     pad = "&nbsp;" * max(0, MIN_NAME - len(str(values[0])))
     cells = [f"<td>{escape(str(values[0]))}{pad}</td>"]
     cells += [_cell("td", v) for v in values[1:]]
@@ -113,9 +112,9 @@ def _html_row(row: dict, main, texts) -> str:
 def build_html(
     rows: list[dict], day_text: str, texts, now: datetime | None = None
 ) -> str:
-    main = _main_year(rows)
+    from app.core import daily_cols
     head = "<tr>" + "".join(_cell("th", h) for h in texts.TBL_HEAD) + "</tr>"
-    body = "".join(_html_row(r, main, texts) for r in rows)
+    body = "".join(_html_row(c, texts) for c in daily_cols.cells(rows, texts))
     top = (
         f"<p><b>{escape(texts.TBL_TITLE)}</b></p>"
         f"<p>{escape(texts.DATE_LINE.format(date=day_text, time=time_text(texts, now)))}</p>"
@@ -124,20 +123,6 @@ def build_html(
     foot = f"<p>{escape(texts.FOOT.strip())}</p>"
     table = "<table bordered striped>" + head + body + "</table>"
     return top + table + foot
-
-
-def table_rows(rows: list[dict], texts) -> list[tuple[str, str, str, int]]:
-    """Plain cells for image output: label, price, change text, direction."""
-    main = _main_year(rows)
-    cells = []
-    for row in rows:
-        value = row.get("change_m") or 0
-        change = _change(row, texts.CHANGE_UP, texts.CHANGE_DOWN).strip()
-        cells.append((
-            _label(row, main), fa(f"{row['price_m']:,}"),
-            change or texts.NO_VALUE, (value > 0) - (value < 0),
-        ))
-    return cells
 
 
 def group_rows(rows: list[dict]) -> list[list[dict]]:
