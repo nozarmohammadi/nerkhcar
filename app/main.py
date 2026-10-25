@@ -13,6 +13,7 @@ from app.adapters.telegram.handlers import (
 from app.adapters.telegram.texts import menu
 from app.config import Settings, load_settings
 from app.data import db, repo_admins, repo_audit
+from app.jobs import car_price_job
 from app.logging_setup import setup_logging
 
 log = logging.getLogger("nerkhcar")
@@ -57,6 +58,7 @@ async def main() -> None:
     prepare_db(settings)
     bot = Bot(token=settings.bot_token)
     log.info("ربات در حال شروع است")
+    price_task = asyncio.create_task(car_price_job.loop())
     await build_dispatcher(settings).start_polling(bot)
 
 
