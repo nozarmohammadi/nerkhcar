@@ -3,6 +3,7 @@
 BTN_CAR_PRICE = "💰 قیمت خودرو"
 BTN_FX_GOLD = "💵 ارز، سکه و طلا"
 BTN_MY_CAR = "🚗 قیمت خودروی من"
+MENU_BUTTONS = (BTN_CAR_PRICE, BTN_FX_GOLD, BTN_MY_CAR)
 
 WELCOME = (
     "سلام! به «نرخ‌کار» خوش آمدی 👋\n"

@@ -14,6 +14,7 @@ from app.adapters.telegram.handlers.daily_state import Daily
 from app.adapters.telegram.guard import active_admin
 from app.adapters.telegram.keyboards import daily_prices as k
 from app.adapters.telegram.texts import daily_prices as t
+from app.adapters.telegram.texts import menu
 from app.config import Settings
 from app.data import db, repo_usage
 from app.core import table_read, usage_day
@@ -100,7 +101,7 @@ async def on_start(cb: CallbackQuery, state: FSMContext, settings: Settings) -> 
     await cb.answer()
 
 
-@router.message(Daily.photos, F.text)
+@router.message(Daily.photos, F.text, ~F.text.in_(menu.MENU_BUTTONS))
 async def on_text(message: Message) -> None:
     await message.answer(t.NEED_PHOTO)
 

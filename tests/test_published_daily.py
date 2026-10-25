@@ -15,6 +15,13 @@ MIGRATION = Path("app/data/migrations/004_published_daily.sql")
 ROW = {"name": "تست", "year": 1404, "price_m": 1000, "change_m": 0}
 
 
+class _State:
+    cleared = False
+
+    async def clear(self):
+        self.cleared = True
+
+
 def make_conn() -> sqlite3.Connection:
     conn = sqlite3.connect(":memory:")
     conn.executescript(MIGRATION.read_text(encoding="utf-8"))
@@ -57,7 +64,7 @@ def _message(sent: list):
 def test_handler_nothing_published(monkeypatch):
     sent = []
     monkeypatch.setattr(car_price.dbrun, "run", lambda *a: None)
-    asyncio.run(car_price.on_car_price(_message(sent), None, None))
+    asyncio.run(car_price.on_car_price(_message(sent), None, None, _State()))
     assert sent == [ct.SOON]
 
 
@@ -72,5 +79,5 @@ def test_handler_sends_table(monkeypatch):
         return "rich"
 
     monkeypatch.setattr(car_price.daily_send, "send_table", fake_send)
-    asyncio.run(car_price.on_car_price(_message([]), None, None))
+    asyncio.run(car_price.on_car_price(_message([]), None, None, _State()))
     assert calls == [(1, [ROW], None, 4)]
