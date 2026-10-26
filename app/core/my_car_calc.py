@@ -20,7 +20,7 @@ def compute(data: dict, answers: dict, now: datetime | None = None) -> dict:
     if data is None or price_age.status(data["published_at"], now) == "expired":
         return {"status": "insufficient", "reason": "stale"}
     found = model_lookup.price_for(data["rows"], answers["name"], answers["year"])
-    km = opt.km_of(answers["km"])
+    km = answers["km"]
     body, chassis = opt.body_of(answers["body"]), opt.chassis_of(answers["chassis"])
     if found is None or km is None or body is None or chassis is None:
         return {"status": "insufficient", "reason": "samples"}

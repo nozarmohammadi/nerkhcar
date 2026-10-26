@@ -34,3 +34,9 @@ def years_kb(years: list[int]) -> InlineKeyboardMarkup:
 def choice_kb(kind: str, labels: tuple) -> InlineKeyboardMarkup:
     rows = [_btn(label, f"mc:{kind}:{i}") for i, label in enumerate(labels)]
     return InlineKeyboardMarkup(inline_keyboard=rows + _nav())
+
+
+def names_kb(found: list[str]) -> InlineKeyboardMarkup:
+    """Search results: one button per name, by index."""
+    rows = [_btn(n, f"mc:m:{i}") for i, n in enumerate(found)]
+    return InlineKeyboardMarkup(inline_keyboard=rows + _nav(False))

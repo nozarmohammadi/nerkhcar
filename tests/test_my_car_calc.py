@@ -7,7 +7,7 @@ DATA = {
     "rows": [{"name": "A", "year": 1404, "price_m": 1000}],
     "published_at": "2026-10-26 02:00:00",
 }
-ANS = {"name": "A", "year": 1404, "km": 1, "body": 0, "chassis": 0}
+ANS = {"name": "A", "year": 1404, "km": 30000, "body": 0, "chassis": 0}
 
 
 def test_ok_three_bands():
@@ -31,7 +31,7 @@ def test_unknown_model():
 
 
 def test_bad_option_index():
-    assert c.compute(DATA, dict(ANS, km=99), NOW)["status"] == "insufficient"
+    assert c.compute(DATA, dict(ANS, km=None), NOW)["status"] == "insufficient"
 
 
 def test_old_year_still_estimates():
