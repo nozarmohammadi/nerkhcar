@@ -8,7 +8,7 @@ from app.adapters.telegram.texts import car_price as t
 from app.adapters.telegram.texts import daily_prices as dp
 from app.adapters.telegram.texts import menu
 from app.config import Settings
-from app.core import published_view
+from app.core import price_age, published_view
 from app.data import repo_published
 
 router = Router()
@@ -24,6 +24,12 @@ async def on_car_price(
     if data is None or not data["rows"]:
         await message.answer(t.SOON)
         return
+    age = price_age.status(data["published_at"])
+    if age == "expired":
+        await message.answer(t.EXPIRED)
+        return
+    if age == "old":
+        await message.answer(t.OLD_NOTE)
     day_text, stamp = published_view.parts(data, dp)
     await daily_send.send_table(
         bot, message.chat.id, data["rows"], day_text, None, stamp)
