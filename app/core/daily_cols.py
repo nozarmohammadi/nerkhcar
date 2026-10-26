@@ -1,5 +1,5 @@
 """Table cells with a separate model-year column. No Telegram imports."""
-from app.core import daily_text
+from app.core import daily_text, name_short
 
 
 def change_text(row: dict, texts, image: bool = False) -> str:
@@ -22,7 +22,7 @@ def cells(
         value = row.get("change_m") or 0
         change = change_text(row, texts, image)
         out.append((
-            row["name"], year_text(row, texts),
+            name_short.short_name(row["name"]), year_text(row, texts),
             daily_text.fa(f"{row['price_m']:,}"),
             change or texts.NO_VALUE, (value > 0) - (value < 0),
         ))
