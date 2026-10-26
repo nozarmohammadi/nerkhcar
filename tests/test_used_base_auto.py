@@ -12,15 +12,15 @@ def test_current_year():
 
 def test_age_zero_and_one():
     assert u.age_factor(0) == 1.00
-    assert u.age_factor(1) == 0.97
+    assert u.age_factor(1) == 0.88
 
 
 def test_interpolation():
-    assert abs(u.age_factor(4) - 0.855) < 1e-9
+    assert abs(u.age_factor(4) - 0.69) < 1e-9
 
 
 def test_old_car_floor():
-    assert u.age_factor(30) == 0.55
+    assert u.age_factor(30) == 0.48
 
 
 def test_negative_age_is_zero():
@@ -29,6 +29,6 @@ def test_negative_age_is_zero():
 
 def test_base_fields():
     b = u.base_from_daily(2000, 1403, PUB, NOW)
-    assert abs(b.price - 2000 * 0.93) < 1e-6
+    assert abs(b.price - 2000 * 0.78) < 1e-6
     assert b.is_fallback and b.samples == 3
     assert b.updated_at == PUB

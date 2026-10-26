@@ -6,8 +6,8 @@ from app.core.used_estimate import Base, interp
 
 # (age in years, price factor); a guess to be calibrated later.
 AGE_CURVE = [
-    (0, 1.00), (1, 0.97), (2, 0.93), (3, 0.89),
-    (5, 0.82), (8, 0.70), (12, 0.55),
+    (0, 1.00), (1, 0.88), (2, 0.78), (3, 0.73),
+    (5, 0.65), (8, 0.57), (12, 0.48),
 ]
 FALLBACK_SAMPLES = 3
 
