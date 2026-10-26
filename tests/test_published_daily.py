@@ -12,6 +12,7 @@ from app.core import published_view
 from app.data import repo_published
 
 MIGRATION = Path("app/data/migrations/004_published_daily.sql")
+SOURCE = Path("app/data/migrations/006_published_source.sql")
 ROW = {"name": "تست", "year": 1404, "price_m": 1000, "change_m": 0}
 
 
@@ -25,6 +26,7 @@ class _State:
 def make_conn() -> sqlite3.Connection:
     conn = sqlite3.connect(":memory:")
     conn.executescript(MIGRATION.read_text(encoding="utf-8"))
+    conn.executescript(SOURCE.read_text(encoding="utf-8"))
     return conn
 
 

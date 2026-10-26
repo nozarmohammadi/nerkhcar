@@ -58,7 +58,7 @@ async def main() -> None:
     prepare_db(settings)
     bot = Bot(token=settings.bot_token)
     log.info("ربات در حال شروع است")
-    price_task = asyncio.create_task(car_price_job.loop())
+    price_task = asyncio.create_task(car_price_job.loop(settings))
     await build_dispatcher(settings).start_polling(bot)
 
 
