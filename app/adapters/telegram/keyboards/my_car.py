@@ -40,3 +40,8 @@ def names_kb(found: list[str]) -> InlineKeyboardMarkup:
     """Search results: one button per name, by index."""
     rows = [_btn(n, f"mc:m:{i}") for i, n in enumerate(found)]
     return InlineKeyboardMarkup(inline_keyboard=rows + _nav(False))
+
+
+def cancel_kb() -> InlineKeyboardMarkup:
+    """Only the cancel button (typed steps)."""
+    return InlineKeyboardMarkup(inline_keyboard=_nav(False))
