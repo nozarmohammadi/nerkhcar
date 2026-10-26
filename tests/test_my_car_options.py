@@ -7,8 +7,8 @@ def test_km_and_bounds():
 
 
 def test_body_chassis():
-    assert o.body_of(0) == "clean" and o.body_of(9) is None
-    assert o.chassis_of(3) == "unknown" and o.chassis_of(4) is None
+    assert o.body_of(0) == "clean" and o.body_of(4) is None
+    assert o.chassis_of(2) == "major" and o.chassis_of(3) is None
 
 
 def test_years():
