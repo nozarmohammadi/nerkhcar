@@ -13,7 +13,8 @@ from app.adapters.telegram.texts import menu
 from app.adapters.telegram.texts import my_car as t
 from app.config import Settings
 from app.core import model_lookup, my_car_calc, my_car_input, my_car_view
-from app.core import used_base_auto
+from app.core import my_car_years
+from app.core import daily_text, used_base_auto
 from app.data import repo_published
 
 router = Router()
@@ -41,6 +42,11 @@ async def on_name(message: Message, state: FSMContext) -> None:
     if not found:
         await message.answer(t.NOT_FOUND, reply_markup=k.cancel_kb())
         return
+    if len(found) == 1:
+        await state.update_data(name=found[0])
+        await state.set_state(MyCar.year)
+        await message.answer(t.ASK_YEAR_TYPED, reply_markup=k.cancel_kb())
+        return
     await state.update_data(found=found)
     await state.set_state(MyCar.pick)
     text, kb = flow.pick_screen(found)
@@ -61,11 +67,22 @@ async def on_pick(cb: CallbackQuery, state: FSMContext) -> None:
 
 
 @router.message(MyCar.year, F.text, ~F.text.in_(menu.MENU_BUTTONS))
-async def on_year(message: Message, state: FSMContext) -> None:
+async def on_year(
+    message: Message, state: FSMContext, settings: Settings
+) -> None:
     current = used_base_auto.current_year(datetime.now())
     year = my_car_input.read_year(message.text, current)
     if year is None:
         await message.answer(t.BAD_YEAR, reply_markup=k.cancel_kb())
+        return
+    data = await state.get_data()
+    published = dbrun.run(settings, repo_published.get)
+    rows = published["rows"] if published else []
+    if my_car_years.check_year(rows, data["name"], year) == "after_last":
+        last = my_car_years.last_year(rows, data["name"])
+        await message.answer(
+            t.YEAR_AFTER_LAST.format(year=daily_text.fa(last)),
+            reply_markup=k.cancel_kb())
         return
     await state.update_data(year=year)
     await state.set_state(MyCar.km)
