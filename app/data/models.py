@@ -27,3 +27,4 @@ class Price:
     updated_at: str
     confirmed_at: str | None
     entered_by: int | None
+    source: str = "photo"

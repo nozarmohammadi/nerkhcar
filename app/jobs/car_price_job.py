@@ -12,7 +12,7 @@ from app.core import car_price_parse
 from app.core import car_price_publish as pub
 from app.core import car_price_schedule as sched
 from app.core import car_price_alert as alerts
-from app.data import db, repo_published
+from app.data import db, repo_prices_tx, repo_published
 
 log = logging.getLogger("nerkhcar.carprice")
 TEHRAN = ZoneInfo("Asia/Tehran")
@@ -32,6 +32,11 @@ def publish_auto(settings: Settings, html: str, moment=None) -> bool:
     stamp, day = pub.stamp_and_day(moment or datetime.now(timezone.utc))
     conn = db.connect(settings.db_path)
     try:
+        for row in rows:
+            repo_prices_tx.sync_auto_by_model(
+                conn, row["name"], row["year"], row["price_m"]
+            )
+        conn.commit()
         return repo_published.replace_auto(conn, day, rows, stamp)
     finally:
         conn.close()

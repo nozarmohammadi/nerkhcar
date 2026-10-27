@@ -4,20 +4,25 @@ import sqlite3
 from app.data.models import Price
 
 UPSERT = (
-    "INSERT INTO prices(trim_id, year, low, high, confidence, status, entered_by) "
-    "VALUES (?,?,?,?,?,?,?) "
+    "INSERT INTO prices(trim_id, year, low, high, confidence, status, "
+    "entered_by, source) VALUES (?,?,?,?,?,?,?,?) "
     "ON CONFLICT(trim_id, year) DO UPDATE SET low=excluded.low, "
     "high=excluded.high, confidence=excluded.confidence, "
     "status=excluded.status, entered_by=excluded.entered_by, "
-    "updated_at=datetime('now'), confirmed_at=NULL"
+    "source=excluded.source, updated_at=datetime('now'), "
+    "confirmed_at=NULL"
 )
 
 
 def upsert_price(
     conn: sqlite3.Connection, trim_id: int, year: int, low: int, high: int,
     confidence: str, status: str, entered_by: int | None,
+    source: str = "photo",
 ) -> int:
-    conn.execute(UPSERT, (trim_id, year, low, high, confidence, status, entered_by))
+    conn.execute(
+        UPSERT,
+        (trim_id, year, low, high, confidence, status, entered_by, source),
+    )
     price = get_price(conn, trim_id, year)
     conn.execute(
         "INSERT INTO price_history(price_id, low, high) VALUES (?,?,?)",
