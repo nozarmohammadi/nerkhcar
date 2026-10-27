@@ -45,3 +45,32 @@ def names_kb(found: list[str]) -> InlineKeyboardMarkup:
 def cancel_kb() -> InlineKeyboardMarkup:
     """Only the cancel button (typed steps)."""
     return InlineKeyboardMarkup(inline_keyboard=_nav(False))
+
+def body_mode_kb(labels: tuple) -> InlineKeyboardMarkup:
+    """Return body damage mode buttons."""
+    return choice_kb("bm", labels)
+
+
+def body_parts_kb(labels: tuple, selected: set[str]) -> InlineKeyboardMarkup:
+    """Return toggle buttons for body parts."""
+    rows = []
+    for key, label in labels:
+        mark = "✅ " if key in selected else "⬜ "
+        rows.append(_btn(mark + label, f"mc:bp:{key}"))
+    rows.append(_btn(t.BTN_CONFIRM, "mc:bp:done"))
+    rows.extend(_nav())
+    return InlineKeyboardMarkup(inline_keyboard=rows)
+
+
+def color_kb(labels: tuple) -> InlineKeyboardMarkup:
+    """Return color selection buttons."""
+    return choice_kb("cl", tuple(label for _, label in labels))
+
+def km_skip_kb() -> InlineKeyboardMarkup:
+    """Return the optional mileage skip button."""
+    return InlineKeyboardMarkup(
+        inline_keyboard=[
+            _btn(t.BTN_KM_SKIP, "mc:km:skip"),
+            _btn(t.BTN_CANCEL, "mc:x"),
+        ]
+    )

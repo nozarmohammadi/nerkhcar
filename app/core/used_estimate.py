@@ -34,7 +34,7 @@ def interp(x: float, curve: list) -> float:
 
 
 def _invalid(car: Car, cfg: dict) -> bool:
-    if car.km < 0 or car.km > cfg["limits"]["max_km"]:
+    if car.km is not None and (car.km < 0 or car.km > cfg["limits"]["max_km"]):
         return True
     if car.year > cfg["current_year"]:
         return True
@@ -44,6 +44,8 @@ def _invalid(car: Car, cfg: dict) -> bool:
 
 
 def _km_factor(car: Car, cfg: dict) -> float:
+    if car.km is None:
+        return 1.0
     age = cfg["current_year"] - car.year
     expected = max(age * cfg["std_km_per_year"], cfg["min_expected_km"])
     return interp(car.km / expected, cfg["mileage_curve"])
@@ -89,6 +91,7 @@ def estimate(car: Car, base: Base | None, zero: float | None,
     s = _spread(car, base, hours, warn, cfg)
     return {
         "status": "ok", "central": central, "warn_above_zero": warn,
+        "confidence_low": base.is_fallback,
         "quick_sale": (central * (1 - 1.5 * s), central * (1 - 0.5 * s)),
         "fair": (central * (1 - 0.5 * s), central * (1 + 0.5 * s)),
         "listing": (central * (1 + 0.5 * s), central * (1 + 1.5 * s)),

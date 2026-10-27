@@ -12,7 +12,7 @@ def _published(stamp: str) -> datetime:
     return datetime.strptime(stamp, FMT).replace(tzinfo=timezone.utc)
 
 
-def compute(data: dict, answers: dict, now: datetime | None = None) -> dict:
+def compute(data: dict, answers: dict, now: datetime | None = None, zero: float | None = None) -> dict:
     """data: published table {rows, published_at}; answers: model name,
     year and option indexes km, body, chassis. Returns the engine result;
     status is 'insufficient' when the table is missing or expired."""
@@ -27,4 +27,4 @@ def compute(data: dict, answers: dict, now: datetime | None = None) -> dict:
     base = used_base_auto.base_from_daily(
         found[0], answers["year"], _published(data["published_at"]), now)
     car = Car(answers["year"], km, body, chassis)
-    return estimate(car, base, None, now)
+    return estimate(car, base, zero, now)

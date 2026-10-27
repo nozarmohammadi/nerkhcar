@@ -11,7 +11,10 @@ class MyCar(StatesGroup):
     year = State()
     km = State()
     body = State()
+    body_mode = State()
+    body_parts = State()
     chassis = State()
+    color = State()
 
 
 def choice_screen(step: str):

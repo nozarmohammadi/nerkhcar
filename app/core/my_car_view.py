@@ -29,4 +29,6 @@ def build_text(result: dict, name: str, year: int, texts) -> str:
             label=getattr(texts, label), low=_num(low), high=_num(high)))
     if result.get("warn_above_zero"):
         lines += ["", texts.WARN_ZERO]
+    if result.get("confidence_low"):
+        lines += ["", texts.LOW_CONFIDENCE]
     return "\n".join(lines + ["", texts.DISCLAIMER])

@@ -55,3 +55,16 @@ def list_trims(conn: sqlite3.Connection, model_id: int) -> list[dict]:
         "SELECT id, name FROM trims WHERE model_id=? ORDER BY name", (model_id,)
     ).fetchall()
     return [dict(r) for r in rows]
+
+def list_user_trims(conn: sqlite3.Connection) -> list[dict]:
+    """Return trims with their brand and model names for user selection."""
+    rows = conn.execute(
+        "SELECT t.id AS trim_id, t.name AS trim, "
+        "m.id AS model_id, m.name AS model, "
+        "b.id AS brand_id, b.name AS brand "
+        "FROM trims t "
+        "JOIN models m ON m.id=t.model_id "
+        "JOIN brands b ON b.id=m.brand_id "
+        "ORDER BY m.name, t.name"
+    ).fetchall()
+    return [dict(r) for r in rows]
