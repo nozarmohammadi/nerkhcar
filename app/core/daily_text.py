@@ -114,21 +114,56 @@ def _html_row(cell: tuple, texts) -> str:
     return "<tr>" + "".join(cells) + "</tr>"
 
 
-def _table(cells: list, texts) -> str:
+def _heading_row(brand: str, texts) -> str:
+    name = escape(brand or texts.OTHER_BRAND)
+    return f"<tr><td><b>{name}</b></td><td></td><td></td><td></td></tr>"
+
+
+def _table(page: list, texts) -> str:
     heads = [_cell("th", h) for h in texts.TBL_HEAD[:3]]
     heads.append(_cell("th", texts.TBL_HEAD[3], "center"))
-    body = "".join(_html_row(c, texts) for c in cells)
-    return "<table bordered striped><tr>" + "".join(heads) + "</tr>" + body + "</table>"
+    body = []
+    for brand, cells in page:
+        if brand is not None:
+            body.append(_heading_row(brand, texts))
+        body += [_html_row(c, texts) for c in cells]
+    head = "<tr>" + "".join(heads) + "</tr>"
+    return "<table bordered striped>" + head + "".join(body) + "</table>"
+
+
+def _groups(rows: list[dict], texts, size: int) -> list:
+    """(brand, cells) per brand; a table without brands is cut into slices."""
+    from app.core import brand_groups, daily_cols
+    out = []
+    for brand, part in brand_groups.grouped(rows):
+        cells = daily_cols.cells(part, texts)
+        if brand is None:
+            out += [(None, cells[i:i + size]) for i in range(0, len(cells), size)]
+        else:
+            out.append((brand, cells))
+    return out
+
+
+def _pages(groups: list, size: int) -> list[list]:
+    """Pack whole brands into pages of about `size` rows; never split a brand."""
+    pages, current, used = [], [], 0
+    for brand, cells in groups:
+        need = len(cells) + (brand is not None)
+        if current and used + need > size:
+            pages.append(current)
+            current, used = [], 0
+        current.append((brand, cells))
+        used += need
+    return pages + [current] if current else [[]]
 
 
 def build_html_chunks(
     rows: list[dict], day_text: str, texts, now: datetime | None = None,
     size: int = ROWS_PER_MESSAGE,
 ) -> list[str]:
-    """One HTML per message; rows without a price are never shown."""
-    from app.core import daily_cols
-    cells = daily_cols.cells([r for r in rows if r.get("price_m")], texts)
-    parts = [cells[i:i + size] for i in range(0, len(cells), size)] or [[]]
+    """One HTML per message; brand heading rows; rows without price hidden."""
+    shown = [r for r in rows if r.get("price_m")]
+    pages = _pages(_groups(shown, texts, size), size)
     when = texts.DATE_LINE.format(date=day_text, time=time_text(texts, now))
     top = (
         f"<p><b>{escape(texts.TBL_TITLE)}</b></p>"
@@ -136,9 +171,9 @@ def build_html_chunks(
     )
     foot = f"<p>{escape(texts.FOOT.strip())}</p>"
     return [
-        (top if i == 0 else "") + _table(part, texts)
-        + (foot if i == len(parts) - 1 else "")
-        for i, part in enumerate(parts)
+        (top if i == 0 else "") + _table(page, texts)
+        + (foot if i == len(pages) - 1 else "")
+        for i, page in enumerate(pages)
     ]
 
 
@@ -146,7 +181,7 @@ def build_html(
     rows: list[dict], day_text: str, texts, now: datetime | None = None
 ) -> str:
     """The whole table as one HTML (small tables and old callers)."""
-    return build_html_chunks(rows, day_text, texts, now, max(len(rows), 1))[0]
+    return build_html_chunks(rows, day_text, texts, now, 10**9)[0]
 
 
 def group_rows(rows: list[dict]) -> list[list[dict]]:
