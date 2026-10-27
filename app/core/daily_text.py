@@ -97,32 +97,56 @@ def text_chunks(text: str) -> list[str]:
     return chunks
 
 
-def _cell(tag: str, value) -> str:
-    return f"<{tag}>{escape(str(value))}</{tag}>"
+ROWS_PER_MESSAGE = 50
+
+
+def _cell(tag: str, value, align: str = "") -> str:
+    attr = f' align="{align}"' if align else ""
+    return f"<{tag}{attr}>{escape(str(value))}</{tag}>"
 
 
 def _html_row(cell: tuple, texts) -> str:
     values = cell[:4]
     pad = "&nbsp;" * max(0, MIN_NAME - len(str(values[0])))
     cells = [f"<td>{escape(str(values[0]))}{pad}</td>"]
-    cells += [_cell("td", v) for v in values[1:]]
+    cells += [_cell("td", v) for v in values[1:3]]
+    cells.append(_cell("td", values[3], "center"))
     return "<tr>" + "".join(cells) + "</tr>"
+
+
+def _table(cells: list, texts) -> str:
+    heads = [_cell("th", h) for h in texts.TBL_HEAD[:3]]
+    heads.append(_cell("th", texts.TBL_HEAD[3], "center"))
+    body = "".join(_html_row(c, texts) for c in cells)
+    return "<table bordered striped><tr>" + "".join(heads) + "</tr>" + body + "</table>"
+
+
+def build_html_chunks(
+    rows: list[dict], day_text: str, texts, now: datetime | None = None,
+    size: int = ROWS_PER_MESSAGE,
+) -> list[str]:
+    """One HTML per message; rows without a price are never shown."""
+    from app.core import daily_cols
+    cells = daily_cols.cells([r for r in rows if r.get("price_m")], texts)
+    parts = [cells[i:i + size] for i in range(0, len(cells), size)] or [[]]
+    when = texts.DATE_LINE.format(date=day_text, time=time_text(texts, now))
+    top = (
+        f"<p><b>{escape(texts.TBL_TITLE)}</b></p>"
+        f"<p>{escape(when)}</p><p>{escape(texts.UNIT)}</p>"
+    )
+    foot = f"<p>{escape(texts.FOOT.strip())}</p>"
+    return [
+        (top if i == 0 else "") + _table(part, texts)
+        + (foot if i == len(parts) - 1 else "")
+        for i, part in enumerate(parts)
+    ]
 
 
 def build_html(
     rows: list[dict], day_text: str, texts, now: datetime | None = None
 ) -> str:
-    from app.core import daily_cols
-    head = "<tr>" + "".join(_cell("th", h) for h in texts.TBL_HEAD) + "</tr>"
-    body = "".join(_html_row(c, texts) for c in daily_cols.cells(rows, texts))
-    top = (
-        f"<p><b>{escape(texts.TBL_TITLE)}</b></p>"
-        f"<p>{escape(texts.DATE_LINE.format(date=day_text, time=time_text(texts, now)))}</p>"
-        f"<p>{escape(texts.UNIT)}</p>"
-    )
-    foot = f"<p>{escape(texts.FOOT.strip())}</p>"
-    table = "<table bordered striped>" + head + body + "</table>"
-    return top + table + foot
+    """The whole table as one HTML (small tables and old callers)."""
+    return build_html_chunks(rows, day_text, texts, now, max(len(rows), 1))[0]
 
 
 def group_rows(rows: list[dict]) -> list[list[dict]]:

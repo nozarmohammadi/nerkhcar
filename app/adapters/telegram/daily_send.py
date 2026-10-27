@@ -27,11 +27,13 @@ async def send_table(
     markup: InlineKeyboardMarkup | None, now: datetime | None = None,
 ) -> str:
     """نتیجه: rich (جدول بومی) یا text (متن فشرده)."""
-    html = daily_text.build_html(rows, date, t, now)
+    parts = daily_text.build_html_chunks(rows, date, t, now)
     try:
-        await bot.send_rich_message(
-            chat_id=chat_id, reply_markup=markup,
-            rich_message=InputRichMessage(html=html, is_rtl=True))
+        for i, html in enumerate(parts):
+            last = i == len(parts) - 1
+            await bot.send_rich_message(
+                chat_id=chat_id, reply_markup=markup if last else None,
+                rich_message=InputRichMessage(html=html, is_rtl=True))
         return "rich"
     except TelegramAPIError as exc:
         log.warning("جدول بومی فرستاده نشد: %s", exc)
