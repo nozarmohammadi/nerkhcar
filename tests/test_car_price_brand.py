@@ -38,3 +38,22 @@ def test_to_rows_keeps_brand():
 def test_row_before_any_heading_has_empty_brand():
     rows = car_price_parse.parse_rows(_row("Z", "2,000,000,000"))
     assert rows[0]["brand"] == ""
+
+
+HEAD_IN_ROW = (
+    '<table><tr><td colspan="6"><h2>قیمت آریسان</h2></td></tr>'
+    "<tr><td>نام خودرو</td><td>سال ساخت</td></tr>"
+    + _row("آریسان ۶", "1,000,000,000")
+    + '<tr><td colspan="6"><h2>قیمت پراید</h2></td></tr>'
+    + _row("۱۱۱", "300,000,000") + "</table>"
+)
+
+
+def test_heading_inside_table_row():
+    rows = car_price_parse.parse_rows(HEAD_IN_ROW)
+    assert [r["brand"] for r in rows] == ["آریسان", "پراید"]
+
+
+def test_arabic_yeh_in_price_word():
+    html = "<h2>قيمت تارا</h2>" + _row("تارا", "1,200,000,000")
+    assert car_price_parse.parse_rows(html)[0]["brand"] == "تارا"

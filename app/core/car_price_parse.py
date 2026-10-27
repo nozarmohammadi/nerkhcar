@@ -48,8 +48,9 @@ def _year(cell: str) -> int | None:
     return nums[0] if nums else None
 
 
-HEAD_OR_ROW = re.compile(r"<h[2-4][^>]*>(.*?)</h[2-4]>|<tr.*?</tr>", re.S)
-BRAND_PREFIX = re.compile(r"^\u0642\u06cc\u0645\u062a\s+")  # "price" + space
+HEAD = re.compile(r"<h[2-4][^>]*>(.*?)</h[2-4]>", re.S)
+ROW_OR_HEAD = re.compile(r"<tr.*?</tr>|<h[2-4][^>]*>.*?</h[2-4]>", re.S)
+BRAND_PREFIX = re.compile(r"^\u0642[\u06cc\u064a]\u0645\u062a\s+")  # "price" + space
 
 
 def _row(row: str, brand: str) -> dict | None:
@@ -71,18 +72,27 @@ def _row(row: str, brand: str) -> dict | None:
     }
 
 
+def _heading_brand(chunk: str, current: str) -> str:
+    """Brand named by a heading inside this chunk; else the current brand."""
+    found = HEAD.search(chunk)
+    if not found:
+        return current
+    title = _text(found.group(1))
+    if BRAND_PREFIX.match(title):
+        return BRAND_PREFIX.sub("", title).strip()
+    return current
+
+
 def parse_rows(html: str) -> list[dict]:
     """Raw rows (toman) with the brand of the last brand heading above them."""
     out, brand = [], ""
-    for found in HEAD_OR_ROW.finditer(html):
-        if found.group(1) is not None:
-            title = _text(found.group(1))
-            if BRAND_PREFIX.match(title):
-                brand = BRAND_PREFIX.sub("", title).strip()
-            continue
-        row = _row(found.group(0), brand)
+    for found in ROW_OR_HEAD.finditer(html):
+        chunk = found.group(0)
+        row = _row(chunk, brand)
         if row:
             out.append(row)
+        elif "price-range" not in chunk:
+            brand = _heading_brand(chunk, brand)
     return out
 
 
