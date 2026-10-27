@@ -48,30 +48,52 @@ def _year(cell: str) -> int | None:
     return nums[0] if nums else None
 
 
+HEAD_OR_ROW = re.compile(r"<h[2-4][^>]*>(.*?)</h[2-4]>|<tr.*?</tr>", re.S)
+BRAND_PREFIX = re.compile(r"^\u0642\u06cc\u0645\u062a\s+")  # "price" + space
+
+
+def _row(row: str, brand: str) -> dict | None:
+    """One table row with a market price; None for any other row."""
+    if "price-range" not in row:
+        return None
+    cells = CELL.findall(row)
+    if len(cells) <= COL_CHANGE:
+        return None
+    price = _market_price(cells[COL_MARKET])
+    if price is None:
+        return None
+    return {
+        "name": _text(cells[COL_NAME]),
+        "year": _year(cells[COL_YEAR]),
+        "price": price,
+        "change": _change(cells[COL_CHANGE], price),
+        "brand": brand,
+    }
+
+
 def parse_rows(html: str) -> list[dict]:
-    """Return raw rows (price and change in toman) that have a market price."""
-    out = []
-    for row in ROW.findall(html):
-        if "price-range" not in row:
+    """Raw rows (toman) with the brand of the last brand heading above them."""
+    out, brand = [], ""
+    for found in HEAD_OR_ROW.finditer(html):
+        if found.group(1) is not None:
+            title = _text(found.group(1))
+            if BRAND_PREFIX.match(title):
+                brand = BRAND_PREFIX.sub("", title).strip()
             continue
-        cells = CELL.findall(row)
-        if len(cells) <= COL_CHANGE:
-            continue
-        price = _market_price(cells[COL_MARKET])
-        if price is None:
-            continue
-        out.append({
-            "name": _text(cells[COL_NAME]),
-            "year": _year(cells[COL_YEAR]),
-            "price": price,
-            "change": _change(cells[COL_CHANGE], price),
-        })
+        row = _row(found.group(0), brand)
+        if row:
+            out.append(row)
     return out
 
 
 def to_rows(html: str) -> list[dict]:
-    """Normalize parsed rows into the same shape as the photo-based rows."""
-    return [table_parse.normalize_row(r) for r in parse_rows(html)]
+    """Normalize parsed rows into the photo-row shape, plus the brand."""
+    out = []
+    for raw in parse_rows(html):
+        row = table_parse.normalize_row(raw)
+        row["brand"] = raw["brand"]
+        out.append(row)
+    return out
 
 
 def page_date(html: str) -> str | None:

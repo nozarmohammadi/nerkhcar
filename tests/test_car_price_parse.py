@@ -50,7 +50,7 @@ def test_to_rows_matches_photo_row_shape():
     rows = {r["name"]: r for r in cp.to_rows(HTML)}
     row = rows["آرتابان توکا"]
     assert (row["year"], row["price_m"], row["flags"]) == (1405, 6375, [])
-    assert set(row) == {"name", "year", "price_m", "change_m", "flags"}
+    assert set(row) == {"name", "year", "price_m", "change_m", "flags", "brand"}
 
 
 def test_gregorian_year_is_flagged():
