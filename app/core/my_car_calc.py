@@ -21,8 +21,15 @@ def compute(data: dict, answers: dict, now: datetime | None = None, zero: float 
         return {"status": "insufficient", "reason": "stale"}
     found = model_lookup.price_for(data["rows"], answers["name"], answers["year"])
     km = answers["km"]
-    body, chassis = opt.body_of(answers["body"]), opt.chassis_of(answers["chassis"])
-    if found is None or km is None or body is None or chassis is None:
+    body_answer = answers["body"]
+    chassis_answer = answers["chassis"]
+    body = body_answer if isinstance(body_answer, str) else opt.body_of(body_answer)
+    chassis = (
+        chassis_answer
+        if isinstance(chassis_answer, str)
+        else opt.chassis_of(chassis_answer)
+    )
+    if found is None or body is None or chassis is None:
         return {"status": "insufficient", "reason": "samples"}
     base = used_base_auto.base_from_daily(
         found[0], answers["year"], _published(data["published_at"]), now)

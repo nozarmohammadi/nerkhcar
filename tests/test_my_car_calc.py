@@ -30,8 +30,9 @@ def test_unknown_model():
     assert r["status"] == "insufficient"
 
 
-def test_bad_option_index():
-    assert c.compute(DATA, dict(ANS, km=None), NOW)["status"] == "insufficient"
+def test_missing_mileage_uses_neutral_factor():
+    result = c.compute(DATA, dict(ANS, km=None), NOW)
+    assert result["status"] == "ok"
 
 
 def test_old_year_still_estimates():
