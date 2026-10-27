@@ -15,9 +15,16 @@ def auto_rows(html: str) -> list[dict]:
     out = []
     for row in car_price_parse.to_rows(html):
         flags = set(row["flags"]) - {"range"}
-        if flags & (ref_import.BLOCKING | {"greg_year"}):
+
+        # 1car uses Gregorian production years for imported vehicles.
+        if "greg_year" in flags and row["year"] is not None:
+            row["year"] -= 621
+            flags.discard("greg_year")
+
+        if flags & ref_import.BLOCKING:
             continue
         if MIN_M <= row["price_m"] <= MAX_M:
+            row["flags"] = sorted(flags)
             out.append(row)
     return out
 

@@ -7,9 +7,12 @@ def _row(name, year, market):
     return "<tr>" + "".join(f"<td>{c}</td>" for c in cells) + "</tr>"
 
 
-def test_only_jalali_year_rows():
+def test_gregorian_year_is_converted_to_jalali():
     html = _row("پراید", 1404, "300,000,000") + _row("وارداتی", 2025, "5,000,000,000")
-    assert [r["name"] for r in pub.auto_rows(html)] == ["پراید"]
+    rows = pub.auto_rows(html)
+
+    assert [r["name"] for r in rows] == ["پراید", "وارداتی"]
+    assert rows[1]["year"] == 1404
 
 
 def test_both_jalali_years_are_kept():
