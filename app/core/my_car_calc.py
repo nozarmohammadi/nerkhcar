@@ -31,7 +31,8 @@ def compute(data: dict, answers: dict, now: datetime | None = None, zero: float 
     )
     if found is None or body is None or chassis is None:
         return {"status": "insufficient", "reason": "samples"}
+    base_price = zero if zero is not None else found[0]
     base = used_base_auto.base_from_daily(
-        found[0], answers["year"], _published(data["published_at"]), now)
+        base_price, answers["year"], _published(data["published_at"]), now)
     car = Car(answers["year"], km, body, chassis)
     return estimate(car, base, zero, now)
