@@ -43,14 +43,37 @@ def sync_auto_price(
 def sync_auto_by_model(
     conn: sqlite3.Connection, model: str, year: int, value: int,
 ) -> int | None:
-    """Store a 1car price for the matching وان‌کار base trim."""
-    row = conn.execute(
-        "SELECT t.id FROM trims t "
-        "JOIN models m ON m.id=t.model_id "
-        "JOIN brands b ON b.id=m.brand_id "
-        "WHERE b.name=? AND m.name=? AND t.name=?",
-        ("وان‌کار", model, "پایه"),
+    """Store a 1car price and create its catalog records when needed."""
+    conn.execute(
+        "INSERT OR IGNORE INTO brands(name) VALUES (?)",
+        ("وان‌کار",),
+    )
+    brand = conn.execute(
+        "SELECT id FROM brands WHERE name=?", ("وان‌کار",)
     ).fetchone()
-    if row is None:
+    if brand is None:
         return None
-    return sync_auto_price(conn, row[0], year, value)
+
+    conn.execute(
+        "INSERT OR IGNORE INTO models(brand_id, name) VALUES (?, ?)",
+        (brand[0], model),
+    )
+    model_row = conn.execute(
+        "SELECT id FROM models WHERE brand_id=? AND name=?",
+        (brand[0], model),
+    ).fetchone()
+    if model_row is None:
+        return None
+
+    conn.execute(
+        "INSERT OR IGNORE INTO trims(model_id, name) VALUES (?, ?)",
+        (model_row[0], "پایه"),
+    )
+    trim = conn.execute(
+        "SELECT id FROM trims WHERE model_id=? AND name=?",
+        (model_row[0], "پایه"),
+    ).fetchone()
+    if trim is None:
+        return None
+
+    return sync_auto_price(conn, trim[0], year, value)
