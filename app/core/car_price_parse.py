@@ -10,6 +10,7 @@ NUMBER = re.compile(r"\d[\d,]*")
 PERCENT = re.compile(r"\d+(?:\.\d+)?")
 DATE = re.compile(r'"dateModified":\s*"(\d{4}-\d{2}-\d{2})"')
 MIN_PRICE = 1_000_000  # ignore numbers below one million toman
+MAX_DAILY_PCT = 15  # a bigger daily move is a wide-range artifact
 # Column order: name, year, market, factory, dealer, daily change.
 COL_NAME, COL_YEAR, COL_MARKET, COL_CHANGE = 0, 1, 2, 5
 
@@ -40,6 +41,8 @@ def _change(cell: str, price: int) -> int | None:
     pct = float(found.group())
     if "trend-down" in cell or "\u25bc" in cell:
         pct = -pct
+    if abs(pct) > MAX_DAILY_PCT:
+        return None
     return round(price - price / (1 + pct / 100))
 
 

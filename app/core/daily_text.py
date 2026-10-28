@@ -62,13 +62,18 @@ def _label(row: dict, main_year) -> str:
     return f"{row['name']} {row['year']}"
 
 
+def _fmt_change(value: float) -> str:
+    """Thousands separators; one decimal only when it is not zero."""
+    return f"{value:,.1f}".removesuffix(".0")
+
+
 def _change(row: dict, up: str, down: str) -> str:
     value = row.get("change_m")
     if not value:
         return ""
     if value > 0:
-        return up.format(n=fa(f"{value:g}"))
-    return down.format(n=fa(f"{-value:g}"))
+        return up.format(n=fa(_fmt_change(value)))
+    return down.format(n=fa(_fmt_change(-value)))
 
 
 def build_text(rows: list[dict], day_text: str, texts) -> str:
