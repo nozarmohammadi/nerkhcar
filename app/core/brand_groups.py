@@ -46,6 +46,11 @@ def _newest_only(rows: list[dict], current_year: int | None = None) -> list[dict
     return out
 
 
+def visible(rows: list[dict], current_year: int | None = None) -> list[dict]:
+    """Rows the public table shows (same filter as `grouped`)."""
+    return _newest_only(rows, current_year)
+
+
 def _family_together(rows: list[dict]) -> list[dict]:
     """Same first word sit together; inside it same first two words; first-seen order."""
     heads: dict[str, dict[str, list[dict]]] = {}

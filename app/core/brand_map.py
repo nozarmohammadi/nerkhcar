@@ -24,9 +24,15 @@ def split(rows: list[dict], groups: tuple) -> list[list[dict]]:
     return out
 
 
-def menu(rows: list[dict], groups: tuple) -> list[tuple[int, int]]:
-    """(group index, priced row count) of every non-empty group."""
-    shown = [r for r in rows if r.get("price_m")]
+def menu(
+    rows: list[dict], groups: tuple, current_year: int | None = None
+) -> list[tuple[int, int]]:
+    """(group index, shown row count) of every non-empty group.
+
+    Counts exactly the rows the table shows (same filter as the table).
+    """
+    shown = brand_groups.visible(
+        [r for r in rows if r.get("price_m")], current_year)
     return [(i, len(p)) for i, p in enumerate(split(shown, groups)) if p]
 
 
