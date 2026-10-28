@@ -33,7 +33,7 @@ async def _send(bot: Bot, chat_id: int, data: dict, rows: list[dict]) -> None:
     await daily_send.send_table(bot, chat_id, rows, day_text, None, stamp)
 
 
-@router.message(F.text == menu.BTN_CAR_PRICE)
+@router.message(F.text.in_((menu.BTN_CAR_PRICE, menu.BTN_CAR_PRICE_OLD)))
 async def on_car_price(
     message: Message, settings: Settings, bot: Bot, state: FSMContext
 ) -> None:

@@ -35,7 +35,8 @@ def test_car_price_clears_state(monkeypatch):
 
 def test_menu_buttons_list():
     assert menu.BTN_CAR_PRICE in menu.MENU_BUTTONS
-    assert len(menu.MENU_BUTTONS) == 3
+    # 3 menu buttons + the old car price label (kept for open keyboards).
+    assert len(menu.MENU_BUTTONS) == 4
 
 
 def test_photo_text_handler_still_registered():
