@@ -7,7 +7,7 @@ from aiogram.types import CallbackQuery, Message
 from app.adapters.ai import gemini
 from app.adapters.telegram import draft_view
 from app.adapters.telegram.dbrun import run
-from app.adapters.telegram.guard import active_admin
+from app.adapters.telegram.guard import active_admin, deny
 from app.adapters.telegram.keyboards import price_import as k
 from app.adapters.telegram.texts import price_import as t
 from app.config import Settings
@@ -123,7 +123,7 @@ async def on_confirm(cb: CallbackQuery, state: FSMContext, settings: Settings) -
     admin = active_admin(settings, cb.from_user.id)
     if admin is None:
         await state.clear()
-        await cb.answer()
+        await deny(cb, settings)
         return
     data = await state.get_data()
     status, saved, blocked = run(

@@ -2,7 +2,7 @@
 from aiogram import F, Router
 from aiogram.types import CallbackQuery
 
-from app.adapters.telegram.guard import owner_only
+from app.adapters.telegram.guard import owner_only, deny
 from app.adapters.telegram.texts import admin_panel as p
 from app.config import Settings
 from app.core import audit_view
@@ -37,7 +37,7 @@ def _format(rows: list[dict]) -> str:
 @router.callback_query(F.data == "adm:log")
 async def on_log(cb: CallbackQuery, settings: Settings) -> None:
     if owner_only(settings, cb.from_user.id) is None:
-        await cb.answer()
+        await deny(cb, settings)
         return
     await cb.message.answer(_format(_load(settings)))
     await cb.answer()

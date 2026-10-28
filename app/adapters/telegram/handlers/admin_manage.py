@@ -4,7 +4,7 @@ from aiogram.fsm.context import FSMContext
 from aiogram.fsm.state import State, StatesGroup
 from aiogram.types import CallbackQuery, Message
 
-from app.adapters.telegram.guard import owner_only
+from app.adapters.telegram.guard import owner_only, deny
 from app.adapters.telegram.keyboards.admin_panel import pick_kb
 from app.adapters.telegram.texts import admin_panel as p
 from app.config import Settings
@@ -31,7 +31,7 @@ def _run(settings: Settings, fn, *args):
 @router.callback_query(F.data == "adm:add")
 async def on_add(cb: CallbackQuery, state: FSMContext, settings: Settings) -> None:
     if owner_only(settings, cb.from_user.id) is None:
-        await cb.answer()
+        await deny(cb, settings)
         return
     await state.set_state(AddAdmin.ask_id)
     await cb.message.answer(p.ASK_ID)
@@ -56,7 +56,7 @@ async def on_new_id(message: Message, state: FSMContext, settings: Settings) -> 
 @router.callback_query(F.data == "adm:list")
 async def on_list(cb: CallbackQuery, settings: Settings) -> None:
     if owner_only(settings, cb.from_user.id) is None:
-        await cb.answer()
+        await deny(cb, settings)
         return
     lines = [
         p.LIST_ROW.format(
@@ -96,7 +96,7 @@ async def on_pick_reset(cb: CallbackQuery, settings: Settings) -> None:
 async def on_remove(cb: CallbackQuery, settings: Settings) -> None:
     actor = owner_only(settings, cb.from_user.id)
     if actor is None:
-        await cb.answer()
+        await deny(cb, settings)
         return
     status = _run(settings, manage.remove_admin, actor, int(cb.data.split(":")[2]))
     await cb.message.answer(p.STATUS[status])
@@ -107,7 +107,7 @@ async def on_remove(cb: CallbackQuery, settings: Settings) -> None:
 async def on_reset(cb: CallbackQuery, settings: Settings) -> None:
     actor = owner_only(settings, cb.from_user.id)
     if actor is None:
-        await cb.answer()
+        await deny(cb, settings)
         return
     status, temp = _run(settings, manage.reset_password, actor,
                         int(cb.data.split(":")[2]))

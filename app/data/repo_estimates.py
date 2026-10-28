@@ -2,6 +2,8 @@
 import json
 import sqlite3
 
+from app.core.model_version import MODEL_VERSION
+
 
 def add(
     conn: sqlite3.Connection,
@@ -17,13 +19,14 @@ def add(
         for key in ("quick_sale", "fair", "listing")
     }
     conn.execute(
-        "INSERT INTO estimates_log(user_id, answers, low, high) "
-        "VALUES (?, ?, ?, ?)",
+        "INSERT INTO estimates_log(user_id, answers, low, high, model_version) "
+        "VALUES (?, ?, ?, ?, ?)",
         (
             user_id,
             json.dumps(payload, ensure_ascii=False),
             round(fair_low),
             round(fair_high),
+            MODEL_VERSION,
         ),
     )
     conn.commit()

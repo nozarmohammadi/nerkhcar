@@ -1,4 +1,4 @@
-"""دسترسی به جدول ادمین‌ها."""
+"""Access to the admins table."""
 import sqlite3
 
 from app.data.models import Admin
@@ -20,7 +20,7 @@ def add_admin(
 
 
 def ensure_owner(conn: sqlite3.Connection, owner_id: int) -> bool:
-    """مالک را از .env ثبت می‌کند (بدون رمز). اگر تازه ساخته شد True."""
+    """Register the owner from .env (no password). True if newly created."""
     if get_admin(conn, owner_id):
         return False
     add_admin(conn, owner_id, "owner")
