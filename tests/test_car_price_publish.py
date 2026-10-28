@@ -71,3 +71,18 @@ def test_run_once_calls_on_fresh(monkeypatch):
     got = []
     assert asyncio.run(job.run_once(TODAY, got.append)) == "fresh"
     assert len(got) == 1
+
+
+def test_force_replaces_newer_auto(tmp_path):
+    conn = _conn(tmp_path)
+    repo.replace_auto(conn, "2026-10-25", [{"n": 2}], "2026-10-25 11:00:00")
+    assert repo.replace_auto(
+        conn, "2026-10-25", [{"n": 1}], "2026-10-25 10:00:00", True)
+    assert repo.get(conn)["rows"] == [{"n": 1}]
+
+
+def test_force_does_not_beat_photo_of_today(tmp_path):
+    conn = _conn(tmp_path)
+    repo.replace(conn, "2026-10-25", [{"n": 1}])
+    assert not repo.replace_auto(
+        conn, "2026-10-25", [{"n": 2}], "2026-10-25 10:00:00", True)

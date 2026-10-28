@@ -5,13 +5,19 @@ from app.core import hm_merge
 from app.jobs import car_price_job as job
 
 
+_FORCED = []
+
+
 def _wire(monkeypatch, fetcher):
     calls = []
+    forced = _FORCED
+    forced.clear()
     monkeypatch.setattr(job.pub, "auto_rows", lambda html: [{"name": "دنا پلاس"}])
     monkeypatch.setattr(job.hm_fetch, "fetch_missing_rows", fetcher)
 
-    def fake_publish(settings, html, moment=None, extra=None):
+    def fake_publish(settings, html, moment=None, extra=None, force=False):
         calls.append(extra)
+        forced.append(force)
         return True
 
     monkeypatch.setattr(job, "publish_auto", fake_publish)
@@ -42,3 +48,12 @@ def test_publish_full_survives_hm_failure(monkeypatch):
 def test_valid_filters_price_range():
     rows = [{"price_m": 50}, {"price_m": 500}, {"price_m": 10**7}]
     assert hm_merge.valid(rows) == [{"price_m": 500}]
+
+
+def test_publish_full_passes_force(monkeypatch):
+    async def fetcher(ours):
+        return []
+
+    _wire(monkeypatch, fetcher)
+    assert asyncio.run(job.publish_full(None, "h", force=True)) is True
+    assert _FORCED == [True]

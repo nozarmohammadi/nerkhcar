@@ -23,16 +23,20 @@ def replace(
 
 
 def replace_auto(
-    conn: sqlite3.Connection, day: str, rows: list, published_at: str
+    conn: sqlite3.Connection, day: str, rows: list, published_at: str,
+    force: bool = False,
 ) -> bool:
-    """Publish auto rows unless a photo of this day (or newer auto) is live."""
+    """Publish auto rows unless a photo of this day (or newer auto) is live.
+
+    force=True skips only the newer-auto guard (used at startup).
+    """
     row = conn.execute(
         "SELECT day, source, published_at FROM published_daily WHERE id=1"
     ).fetchone()
     if row is not None:
         if row[1] == PHOTO and row[0] >= day:
             return False
-        if row[1] == AUTO and row[2] > published_at:
+        if row[1] == AUTO and row[2] > published_at and not force:
             return False
     replace(conn, day, rows, AUTO, published_at)
     return True

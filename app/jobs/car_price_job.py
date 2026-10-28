@@ -25,7 +25,7 @@ def already_saved(today: str) -> bool:
 
 
 def publish_auto(
-    settings: Settings, html: str, moment=None, extra=None
+    settings: Settings, html: str, moment=None, extra=None, force: bool = False
 ) -> bool:
     """Publish the page rows unless a photo table of today is already live."""
     rows = pub.auto_rows(html) + hm_merge.valid(extra or [])
@@ -40,12 +40,14 @@ def publish_auto(
                 conn, row["name"], row["year"], row["price_m"]
             )
         conn.commit()
-        return repo_published.replace_auto(conn, day, rows, stamp)
+        return repo_published.replace_auto(conn, day, rows, stamp, force)
     finally:
         conn.close()
 
 
-async def publish_full(settings: Settings, html: str, moment=None) -> bool:
+async def publish_full(
+    settings: Settings, html: str, moment=None, force: bool = False
+) -> bool:
     """Publish the 1car rows plus the models 1car lacks (hamrah-mechanic)."""
     ours = [my_car_input.norm(r["name"]) for r in pub.auto_rows(html)]
     try:
@@ -53,7 +55,7 @@ async def publish_full(settings: Settings, html: str, moment=None) -> bool:
     except Exception as exc:
         log.warning("hm extra rows failed: %s", type(exc).__name__)
         extra = []
-    return publish_auto(settings, html, moment, extra)
+    return publish_auto(settings, html, moment, extra, force)
 
 
 async def publish_latest(settings: Settings) -> None:
@@ -63,7 +65,8 @@ async def publish_latest(settings: Settings) -> None:
         return
     moment = datetime.fromtimestamp(files[-1].stat().st_mtime, timezone.utc)
     html = files[-1].read_text(encoding="utf-8")
-    await publish_full(settings, html, moment)
+    done = await publish_full(settings, html, moment, force=True)
+    log.info("startup publish: %s", "published" if done else "skipped")
 
 
 async def _extend(settings: Settings, today: str) -> None:
