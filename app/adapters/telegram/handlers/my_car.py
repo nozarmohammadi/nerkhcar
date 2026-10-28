@@ -4,15 +4,15 @@ from aiogram import F, Router
 from aiogram.fsm.context import FSMContext
 from aiogram.types import CallbackQuery, Message
 from app.adapters.telegram import dbrun
-from app.adapters.telegram.handlers import my_car_flow as flow, my_car_year_prompt as yp
+from app.adapters.telegram.handlers import my_car_flow as flow, my_car_year_prompt as yp, my_car_result as res
 from app.adapters.telegram.handlers.my_car_flow import MyCar
 from app.adapters.telegram.keyboards import my_car as k
 from app.adapters.telegram.texts import menu
 from app.adapters.telegram.texts import my_car as t
 from app.config import Settings
-from app.core import my_car_calc, my_car_input, my_car_view
+from app.core import my_car_input
 from app.core import body_parts as body_logic
-from app.data import repo_catalog, repo_estimates, repo_prices
+from app.data import repo_catalog
 from app.core import my_car_years
 from app.core import daily_text, used_base_auto
 from app.data import repo_published
@@ -161,27 +161,11 @@ async def on_color(
     if index >= len(t.COLOR_LABELS):
         await cb.answer()
         return
-    answers = await state.get_data(); answers["color"] = t.COLOR_LABELS[index][0]
-    await state.clear(); data = dbrun.run(settings, repo_published.get)
-    price = dbrun.run(
-        settings,
-        lambda conn: repo_prices.get_price(
-            conn, answers["trim_id"], answers["year"]
-        ),
-    )
-    zero = None if price is None else price.low
-    result = my_car_calc.compute(data, answers, zero=zero)
-    if result["status"] != "ok":
-        await cb.message.edit_text(t.NO_DATA)
-    else:
-        dbrun.run(
-            settings,
-            lambda conn: repo_estimates.add(
-                conn, cb.from_user.id, answers, result
-            ),
-        )
-        text = my_car_view.build_text(result, answers["name"], answers["year"], t)
-        await cb.message.edit_text(text)
+    answers = await state.get_data()
+    answers["color"] = t.COLOR_LABELS[index][0]
+    await state.clear()
+    text = res.finish(settings, cb.from_user.id, answers)
+    await cb.message.edit_text(text)
     await cb.answer()
 
 @router.callback_query(F.data == "mc:back")

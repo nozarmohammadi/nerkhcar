@@ -1,6 +1,9 @@
 """نگهبان پنل: نشست فعال و نقش مالک را چک می‌کند."""
 from datetime import datetime
 
+from aiogram.types import CallbackQuery
+
+from app.adapters.telegram.texts.session import SESSION_EXPIRED
 from app.config import Settings
 from app.core import admin_auth, admin_manage
 from app.data import db, repo_admins
@@ -21,3 +24,11 @@ def active_admin(settings: Settings, uid: int) -> Admin | None:
 def owner_only(settings: Settings, uid: int) -> Admin | None:
     admin = active_admin(settings, uid)
     return admin if admin_manage.can_manage(admin) else None
+
+
+async def deny(cb: CallbackQuery, settings: Settings) -> None:
+    """Answer a refused panel button press; explain an expired session."""
+    if active_admin(settings, cb.from_user.id) is None:
+        await cb.answer(SESSION_EXPIRED, show_alert=True)
+    else:
+        await cb.answer()

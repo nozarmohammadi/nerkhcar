@@ -22,6 +22,9 @@ router = Router()
 router.message.filter(F.chat.type == "private")
 
 
+NOT_START = ~F.text.startswith("/start")  # let /start reset the state
+
+
 class Login(StatesGroup):
     password = State()
     new_password = State()
@@ -74,7 +77,7 @@ async def on_admin(message: Message, state: FSMContext, settings: Settings) -> N
         await message.answer(t.ASK_PW_PROMPT)
 
 
-@router.message(Login.password, F.text)
+@router.message(Login.password, F.text, NOT_START)
 async def on_password(message: Message, state: FSMContext, settings: Settings) -> None:
     await _wipe(message)
     uid = message.from_user.id
@@ -95,7 +98,7 @@ async def on_password(message: Message, state: FSMContext, settings: Settings) -
         await message.bot.send_message(settings.owner_id, alert)
 
 
-@router.message(Login.new_password, F.text)
+@router.message(Login.new_password, F.text, NOT_START)
 async def on_new_password(
     message: Message, state: FSMContext, settings: Settings
 ) -> None:
