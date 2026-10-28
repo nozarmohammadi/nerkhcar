@@ -1,8 +1,14 @@
 """Build the result text of the 'my car' estimate (pure logic)."""
 from app.core import daily_text
 
-BANDS = (("quick_sale", "BAND_QUICK"), ("fair", "BAND_FAIR"),
-         ("listing", "BAND_LISTING"))
+MILLION = 1_000_000
+LABELS = ("BAND_QUICK", "BAND_FAIR", "BAND_LISTING")
+
+
+def three_values(result: dict) -> tuple[float, float, float]:
+    """Lowest, approximate (fair midpoint), highest; million toman."""
+    return (result["quick_sale"][0], sum(result["fair"]) / 2,
+            result["listing"][1])
 
 
 def round_m(value: float) -> int:
@@ -12,7 +18,8 @@ def round_m(value: float) -> int:
 
 
 def _num(value: float) -> str:
-    return daily_text.fa(f"{round_m(value):,}")
+    """Full toman with separators, in Persian digits."""
+    return daily_text.fa(f"{round_m(value) * MILLION:,}")
 
 
 def build_text(result: dict, name: str, year: int, texts) -> str:
@@ -23,10 +30,9 @@ def build_text(result: dict, name: str, year: int, texts) -> str:
         texts.UNIT_LINE,
         "",
     ]
-    for key, label in BANDS:
-        low, high = result[key]
+    for label, value in zip(LABELS, three_values(result)):
         lines.append(texts.BAND_LINE.format(
-            label=getattr(texts, label), low=_num(low), high=_num(high)))
+            label=getattr(texts, label), value=_num(value)))
     if result.get("warn_above_zero"):
         lines += ["", texts.WARN_ZERO]
     if result.get("confidence_low"):
