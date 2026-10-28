@@ -8,8 +8,9 @@ def _row(name, year, brand="b"):
 
 def test_newest_year_only():
     rows = [_row("a x", 1404), _row("a x", 1405), _row("b y", 1401), _row("b y", 1400)]
-    out = bg.grouped(rows)[0][1]
-    assert [(r["name"], r["year"]) for r in out] == [("a x", 1405), ("b y", 1401)]
+    out = bg.grouped(rows, current_year=1405)[0][1]
+    # A discontinued model (newest year 1401) is no longer shown.
+    assert [(r["name"], r["year"]) for r in out] == [("a x", 1405)]
 
 
 def test_family_together():
