@@ -38,7 +38,9 @@ def _invalid(car: Car, cfg: dict) -> bool:
         return True
     if car.year > cfg["current_year"]:
         return True
-    if car.body not in cfg["body"] or car.chassis not in cfg["chassis"]:
+    if body_factor(car.body, cfg) is None:
+        return True
+    if car.chassis not in cfg["chassis"]:
         return True
     return car.color is not None and car.color not in cfg["color"]
 
@@ -51,8 +53,22 @@ def _km_factor(car: Car, cfg: dict) -> float:
     return interp(car.km / expected, cfg["mileage_curve"])
 
 
+def body_factor(body: str, cfg: dict) -> float | None:
+    """Return the price factor of a body code, None when invalid.
+
+    A code is a key of cfg["body"] or "drop_N": N percent price drop
+    summed from the selected parts (see app/core/body_parts.py).
+    """
+    if body in cfg["body"]:
+        return cfg["body"][body]
+    if body.startswith("drop_") and body[5:].isdigit():
+        return max(0.0, 1 - int(body[5:]) / 100)
+    return None
+
+
 def _damage_factor(car: Car, cfg: dict) -> float:
-    body, chassis = cfg["body"][car.body], cfg["chassis"][car.chassis]
+    body = body_factor(car.body, cfg)
+    chassis = cfg["chassis"][car.chassis]
     worst, other = min(body, chassis), max(body, chassis)
     return worst * (1 - cfg["second_damage_weight"] * (1 - other))
 
