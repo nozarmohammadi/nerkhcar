@@ -14,16 +14,15 @@ def _newest_only(rows: list[dict]) -> list[dict]:
     return [r for r in rows if (r.get("year") or 0) == best[r.get("name")]]
 
 
-def _family(name: str) -> str:
-    return " ".join(str(name).split()[:2])
-
-
 def _family_together(rows: list[dict]) -> list[dict]:
-    """Rows of one model family sit together; families in first-seen order."""
-    fams: dict[str, list[dict]] = {}
+    """Same first word sit together; inside it same first two words; first-seen order."""
+    heads: dict[str, dict[str, list[dict]]] = {}
     for row in rows:
-        fams.setdefault(_family(row.get("name") or ""), []).append(row)
-    return [row for fam in fams.values() for row in fam]
+        words = str(row.get("name") or "").split()
+        head = words[0] if words else ""
+        sub = " ".join(words[:2])
+        heads.setdefault(head, {}).setdefault(sub, []).append(row)
+    return [r for subs in heads.values() for fam in subs.values() for r in fam]
 
 
 def grouped(rows: list[dict]) -> list[tuple[str | None, list[dict]]]:
