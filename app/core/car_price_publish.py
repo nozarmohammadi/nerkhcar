@@ -16,10 +16,8 @@ def auto_rows(html: str) -> list[dict]:
     for row in car_price_parse.to_rows(html):
         flags = set(row["flags"]) - {"range"}
 
-        # 1car uses Gregorian production years for imported vehicles.
-        if "greg_year" in flags and row["year"] is not None:
-            row["year"] -= 621
-            flags.discard("greg_year")
+        # Imported vehicles keep their Gregorian year; only the flag goes.
+        flags.discard("greg_year")
 
         if flags & ref_import.BLOCKING:
             continue

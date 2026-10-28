@@ -34,3 +34,21 @@ def base_from_daily(
         updated_at=published_at,
         is_fallback=True,
     )
+
+
+def base_exact(price_m: float, published_at: datetime) -> Base:
+    """Table price of the exact model year, used as is (not a fallback)."""
+    return Base(price=price_m, samples=FALLBACK_SAMPLES, updated_at=published_at)
+
+
+def base_aged(
+    newest_m: float, newest_year: int, car_year: int,
+    published_at: datetime, now: datetime,
+) -> Base:
+    """Newest table price scaled by the age ratio of the two years."""
+    now_year = current_year(now)
+    ratio = age_factor(now_year - car_year) / age_factor(now_year - newest_year)
+    return Base(
+        price=newest_m * min(ratio, 1.0), samples=FALLBACK_SAMPLES,
+        updated_at=published_at, is_fallback=True,
+    )

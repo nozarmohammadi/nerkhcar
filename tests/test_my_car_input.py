@@ -24,7 +24,8 @@ def test_search_limit():
 def test_year():
     assert i.read_year("۱۴۰۲", 1405) == 1402
     assert i.read_year("1402", 1405) == 1402
-    assert i.read_year("2000", 1405) is None
+    assert i.read_year("2000", 1405) == 2000
+    assert i.read_year("2100", 1405) is None
     assert i.read_year("abc", 1405) is None
 
 

@@ -2,14 +2,28 @@
 from datetime import datetime, timezone
 
 from app.core import model_lookup, my_car_options as opt
-from app.core import price_age, used_base_auto
+from app.core import my_car_years, price_age, used_base_auto
+from app.core.used_config import CFG
 from app.core.used_estimate import Car, estimate
 
 FMT = "%Y-%m-%d %H:%M:%S"
+# Mileage is an unverified guess: keep the factor flat until calibrated.
+FLAT_KM = [(0.5, 1.0), (3.0, 1.0)]
 
 
 def _published(stamp: str) -> datetime:
     return datetime.strptime(stamp, FMT).replace(tzinfo=timezone.utc)
+
+
+def _base(data: dict, answers: dict, found: tuple, price: float, now):
+    """Exact table year as is; otherwise the newest year aged to the car year."""
+    stamp = _published(data["published_at"])
+    if found[1]:
+        return used_base_auto.base_exact(price, stamp)
+    year, newest = model_lookup.newest_price(data["rows"], answers["name"])
+    return used_base_auto.base_aged(
+        newest, my_car_years.to_jalali(year),
+        my_car_years.to_jalali(answers["year"]), stamp, now)
 
 
 def compute(data: dict, answers: dict, now: datetime | None = None, zero: float | None = None) -> dict:
@@ -32,7 +46,9 @@ def compute(data: dict, answers: dict, now: datetime | None = None, zero: float 
     if found is None or body is None or chassis is None:
         return {"status": "insufficient", "reason": "samples"}
     base_price = zero if zero is not None else found[0]
-    base = used_base_auto.base_from_daily(
-        base_price, answers["year"], _published(data["published_at"]), now)
-    car = Car(answers["year"], km, body, chassis)
-    return estimate(car, base, zero, now)
+    year_j = my_car_years.to_jalali(answers["year"])
+    base = _base(data, answers, found, base_price, now)
+    car = Car(year_j, km, body, chassis)
+    cfg = {**CFG, "current_year": used_base_auto.current_year(now),
+           "mileage_curve": FLAT_KM}
+    return estimate(car, base, zero, now, cfg)

@@ -81,5 +81,6 @@ def test_handler_sends_table(monkeypatch):
         return "rich"
 
     monkeypatch.setattr(car_price.daily_send, "send_table", fake_send)
+    monkeypatch.setattr(car_price.price_age, "status", lambda *a: "fresh")
     asyncio.run(car_price.on_car_price(_message([]), None, None, _State()))
     assert calls == [(1, [ROW], None, 4)]

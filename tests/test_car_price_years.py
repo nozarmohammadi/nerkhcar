@@ -12,7 +12,7 @@ def test_gregorian_year_is_converted_to_jalali():
     rows = pub.auto_rows(html)
 
     assert [r["name"] for r in rows] == ["پراید", "وارداتی"]
-    assert rows[1]["year"] == 1404
+    assert rows[1]["year"] == 2025
 
 
 def test_both_jalali_years_are_kept():

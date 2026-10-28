@@ -29,12 +29,31 @@ class State:
         self.state = s
 
 
-def test_single_result_goes_to_year():
-    st = State({"names": ["آریسان 2", "اطلس"]})
-    msg = Msg("آریسان")
-    asyncio.run(my_car.on_name(msg, st))
+def _ask(monkeypatch, rows, names, text):
+    pub = {"rows": rows} if rows is not None else None
+    monkeypatch.setattr(my_car.dbrun, "run", lambda *a: pub)
+    st = State({"names": names})
+    msg = Msg(text)
+    asyncio.run(my_car.on_name(msg, st, SimpleNamespace()))
+    return st, msg
+
+
+def test_single_result_goes_to_year(monkeypatch):
+    st, msg = _ask(monkeypatch, None, ["آریسان 2", "اطلس"], "آریسان")
     assert st.data["name"] == "آریسان 2"
     assert msg.sent == [t.ASK_YEAR_TYPED]
+
+
+def test_domestic_gets_jalali_example(monkeypatch):
+    rows = [{"name": "آریسان 2", "year": 1403, "price_m": 1}]
+    st, msg = _ask(monkeypatch, rows, ["آریسان 2", "اطلس"], "آریسان")
+    assert msg.sent == [t.ASK_YEAR_TYPED]
+
+
+def test_imported_gets_gregorian_example(monkeypatch):
+    rows = [{"name": "بنز C200", "year": 2022, "price_m": 1}]
+    st, msg = _ask(monkeypatch, rows, ["بنز C200", "اطلس"], "بنز")
+    assert msg.sent == [t.ASK_YEAR_GREG]
 
 
 def test_year_after_last(monkeypatch):

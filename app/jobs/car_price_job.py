@@ -6,9 +6,10 @@ from datetime import datetime, timezone
 from zoneinfo import ZoneInfo
 
 from app.adapters import car_price_fetch as fetch
+from app.adapters import hm_fetch
 from app.adapters.telegram.texts import car_price as texts
 from app.config import Settings
-from app.core import car_price_parse
+from app.core import car_price_parse, hm_merge, my_car_input
 from app.core import car_price_publish as pub
 from app.core import car_price_schedule as sched
 from app.core import car_price_alert as alerts
@@ -23,9 +24,11 @@ def already_saved(today: str) -> bool:
     return (fetch.RAW_DIR / f"price-{today}.html").exists()
 
 
-def publish_auto(settings: Settings, html: str, moment=None) -> bool:
+def publish_auto(
+    settings: Settings, html: str, moment=None, extra=None
+) -> bool:
     """Publish the page rows unless a photo table of today is already live."""
-    rows = pub.auto_rows(html)
+    rows = pub.auto_rows(html) + hm_merge.valid(extra or [])
     if not rows:
         log.warning("car price page gave no rows")
         return False
@@ -42,12 +45,34 @@ def publish_auto(settings: Settings, html: str, moment=None) -> bool:
         conn.close()
 
 
-def publish_latest(settings: Settings) -> None:
+async def publish_full(settings: Settings, html: str, moment=None) -> bool:
+    """Publish the 1car rows plus the models 1car lacks (hamrah-mechanic)."""
+    ours = [my_car_input.norm(r["name"]) for r in pub.auto_rows(html)]
+    try:
+        extra = await hm_fetch.fetch_missing_rows(ours)
+    except Exception as exc:
+        log.warning("hm extra rows failed: %s", type(exc).__name__)
+        extra = []
+    return publish_auto(settings, html, moment, extra)
+
+
+async def publish_latest(settings: Settings) -> None:
     """After a restart, publish the newest saved raw page (time = file time)."""
     files = sorted(fetch.RAW_DIR.glob("price-*.html"), key=lambda p: p.stat().st_mtime)
-    if files:
-        moment = datetime.fromtimestamp(files[-1].stat().st_mtime, timezone.utc)
-        publish_auto(settings, files[-1].read_text(encoding="utf-8"), moment)
+    if not files:
+        return
+    moment = datetime.fromtimestamp(files[-1].stat().st_mtime, timezone.utc)
+    html = files[-1].read_text(encoding="utf-8")
+    await publish_full(settings, html, moment)
+
+
+async def _extend(settings: Settings, today: str) -> None:
+    """Add the missing models after a fresh 1car page; never raises."""
+    try:
+        path = fetch.RAW_DIR / f"price-{today}.html"
+        await publish_full(settings, path.read_text(encoding="utf-8"))
+    except Exception as exc:
+        log.warning("extend publish failed: %s", type(exc).__name__)
 
 
 async def run_once(today: str, on_fresh=None) -> str:
@@ -82,6 +107,8 @@ async def _round(settings: Settings, today: str, now, state: dict) -> None:
     """One poll round; keep the count of failed downloads in a row."""
     if sched.in_window(now) and not already_saved(today):
         result = await run_once(today, lambda h: publish_auto(settings, h))
+        if result == "fresh":
+            await _extend(settings, today)
         log.info("car price poll: %s", result)
         state["fails"] = state["fails"] + 1 if result == "fail" else 0
 
@@ -97,7 +124,7 @@ async def _alert(settings: Settings, bot, now, today: str, state: dict) -> None:
 async def loop(settings: Settings, bot=None) -> None:
     """Run forever; an error in one round never stops the loop."""
     try:
-        publish_latest(settings)
+        await publish_latest(settings)
     except Exception as exc:
         log.warning("car price startup publish: %s", type(exc).__name__)
     state = {"fails": 0, "sent": set()}

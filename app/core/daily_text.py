@@ -4,7 +4,7 @@ from datetime import date, datetime
 from zoneinfo import ZoneInfo
 from html import escape
 
-from app.core import jalali, ref_import
+from app.core import brand_banner, jalali, ref_import
 
 CHUNK_CHARS = 3800
 MIN_NAME = 16
@@ -114,21 +114,18 @@ def _html_row(cell: tuple, texts) -> str:
     return "<tr>" + "".join(cells) + "</tr>"
 
 
-def _heading_row(brand: str, texts) -> str:
-    name = escape(brand or texts.OTHER_BRAND)
-    return f"<tr><td><b>{name}</b></td><td></td><td></td><td></td></tr>"
-
-
 def _table(page: list, texts) -> str:
     heads = [_cell("th", h) for h in texts.TBL_HEAD[:3]]
     heads.append(_cell("th", texts.TBL_HEAD[3], "center"))
-    body = []
+    head = "<tr>" + "".join(heads) + "</tr>"
+    out = []
     for brand, cells in page:
         if brand is not None:
-            body.append(_heading_row(brand, texts))
-        body += [_html_row(c, texts) for c in cells]
-    head = "<tr>" + "".join(heads) + "</tr>"
-    return "<table bordered striped>" + head + "".join(body) + "</table>"
+            key = brand_banner.banner_id(brand or texts.OTHER_BRAND)
+            out.append(f'<img src="tg://photo?id={key}"/>')
+        rows = "".join(_html_row(c, texts) for c in cells)
+        out.append("<table bordered striped>" + head + rows + "</table>")
+    return "".join(out)
 
 
 def _groups(rows: list[dict], texts, size: int) -> list:
@@ -140,7 +137,8 @@ def _groups(rows: list[dict], texts, size: int) -> list:
         if brand is None:
             out += [(None, cells[i:i + size]) for i in range(0, len(cells), size)]
         else:
-            out.append((brand, cells))
+            out += [(brand, cells[i:i + size])
+                    for i in range(0, len(cells), size)]
     return out
 
 

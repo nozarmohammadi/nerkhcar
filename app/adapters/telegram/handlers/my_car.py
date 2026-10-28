@@ -4,7 +4,7 @@ from aiogram import F, Router
 from aiogram.fsm.context import FSMContext
 from aiogram.types import CallbackQuery, Message
 from app.adapters.telegram import dbrun
-from app.adapters.telegram.handlers import my_car_flow as flow
+from app.adapters.telegram.handlers import my_car_flow as flow, my_car_year_prompt as yp
 from app.adapters.telegram.handlers.my_car_flow import MyCar
 from app.adapters.telegram.keyboards import my_car as k
 from app.adapters.telegram.texts import menu
@@ -31,7 +31,7 @@ async def on_start(message: Message, settings: Settings, state: FSMContext) -> N
     await state.set_state(MyCar.name)
     await message.answer(t.ASK_NAME, reply_markup=k.cancel_kb())
 @router.message(MyCar.name, F.text, ~F.text.in_(menu.MENU_BUTTONS))
-async def on_name(message: Message, state: FSMContext) -> None:
+async def on_name(message: Message, state: FSMContext, settings: Settings) -> None:
     names = (await state.get_data())["names"]
     found = my_car_input.search(names, message.text)
     if not found:
@@ -46,14 +46,14 @@ async def on_name(message: Message, state: FSMContext) -> None:
             update["trim_id"] = trim["trim_id"]
         await state.update_data(**update)
         await state.set_state(MyCar.year)
-        await message.answer(t.ASK_YEAR_TYPED, reply_markup=k.cancel_kb())
+        await message.answer(yp.year_prompt(settings, found[0]), reply_markup=k.cancel_kb())
         return
     await state.update_data(found=found)
     await state.set_state(MyCar.pick)
     text, kb = flow.pick_screen(found)
     await message.answer(text, reply_markup=kb)
 @router.callback_query(MyCar.pick, F.data.regexp(r"^mc:m:\d+$"))
-async def on_pick(cb: CallbackQuery, state: FSMContext) -> None:
+async def on_pick(cb: CallbackQuery, state: FSMContext, settings: Settings) -> None:
     found = (await state.get_data())["found"]
     index = int(cb.data.split(":")[2])
     if index >= len(found):
@@ -63,7 +63,7 @@ async def on_pick(cb: CallbackQuery, state: FSMContext) -> None:
     trim = next(row for row in catalog if row["model"] == found[index])
     await state.update_data(name=found[index], trim_id=trim["trim_id"])
     await state.set_state(MyCar.year)
-    await cb.message.edit_text(t.ASK_YEAR_TYPED, reply_markup=k.cancel_kb())
+    await cb.message.edit_text(yp.year_prompt(settings, found[index]), reply_markup=k.cancel_kb())
     await cb.answer()
 @router.message(MyCar.year, F.text, ~F.text.in_(menu.MENU_BUTTONS))
 async def on_year(
@@ -83,7 +83,7 @@ async def on_year(
             t.YEAR_AFTER_LAST.format(year=daily_text.fa(last)),
             reply_markup=k.cancel_kb())
         return
-    await state.update_data(year=year)
+    await state.update_data(year=my_car_years.match_year(rows, data["name"], year))
     await state.set_state(MyCar.km)
     await message.answer(t.ASK_KM_TYPED, reply_markup=k.km_skip_kb())
 

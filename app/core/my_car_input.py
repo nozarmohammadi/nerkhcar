@@ -4,6 +4,8 @@ from app.core import table_parse
 MAX_RESULTS = 8
 MIN_YEAR = 1370
 MAX_KM = 1_500_000
+GREG_MIN = 1990
+GREG_OFFSET = 621
 _SAME = str.maketrans({"\u064a": "\u06cc", "\u0643": "\u06a9", "\u0629": "\u0647", "\u200c": " "})
 
 
@@ -23,7 +25,10 @@ def search(names: list[str], query: str) -> list[str]:
 def read_year(text: str, current: int) -> int | None:
     """A model year between MIN_YEAR and the current year, else None."""
     year = table_parse.to_int(text)
-    if year is None or not MIN_YEAR <= year <= current:
+    ok = year is not None and (
+        MIN_YEAR <= year <= current
+        or GREG_MIN <= year <= current + GREG_OFFSET)
+    if not ok:
         return None
     return year
 
