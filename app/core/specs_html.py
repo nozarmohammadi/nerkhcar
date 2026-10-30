@@ -18,8 +18,17 @@ def _cell(tag: str, value: str) -> str:
     return f"<{tag}>{escape(value)}</{tag}>"
 
 
+def slides(photo_ids: tuple) -> str:
+    """Slideshow block of photos, or empty when there are none."""
+    if not photo_ids:
+        return ""
+    imgs = "".join(f'<img src="tg://photo?id={i}"/>' for i in photo_ids)
+    return "<tg-slideshow>" + imgs + "</tg-slideshow>"
+
+
 def build_html(
-    title: str, pairs: list[tuple[str, str]], head: tuple, banner_id: str = ""
+    title: str, pairs: list[tuple[str, str]], head: tuple,
+    banner_id: str = "", photo_ids: tuple = (),
 ) -> str:
     """Cover image (optional), then a two-column bordered table, Persian digits."""
     top = "<tr>" + "".join(_cell("th", h) for h in head) + "</tr>"
@@ -29,7 +38,7 @@ def build_html(
     )
     table = "<table bordered striped>" + top + body + "</table>"
     cover = f'<img src="tg://photo?id={banner_id}"/>' if banner_id else ""
-    return cover + table
+    return cover + slides(photo_ids) + table
 
 
 def build_text(title: str, pairs: list[tuple[str, str]]) -> str:

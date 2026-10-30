@@ -58,4 +58,5 @@ async def on_car(cb: CallbackQuery, settings: Settings, bot: Bot) -> None:
     pairs = specs_view.pairs(row["specs"], t.LABELS)
     theme = t.THEMES[specs_view.group_index(row["slug"], t.GROUPS)]
     await specs_send.send_table(
-        bot, cb.message.chat.id, title, pairs, row["name"], theme)
+        bot, cb.message.chat.id, title, pairs, row["name"], theme,
+        slug=row["slug"])
