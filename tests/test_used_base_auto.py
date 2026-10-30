@@ -20,7 +20,7 @@ def test_interpolation():
 
 
 def test_old_car_floor():
-    assert u.age_factor(30) == 0.48
+    assert u.age_factor(30) == 0.32
 
 
 def test_negative_age_is_zero():

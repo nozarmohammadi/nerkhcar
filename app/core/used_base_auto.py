@@ -8,6 +8,7 @@ from app.core.used_estimate import Base, interp
 AGE_CURVE = [
     (0, 1.00), (1, 0.88), (2, 0.78), (3, 0.73),
     (5, 0.65), (8, 0.57), (12, 0.48),
+    (16, 0.38), (20, 0.32),
 ]
 FALLBACK_SAMPLES = 3
 
