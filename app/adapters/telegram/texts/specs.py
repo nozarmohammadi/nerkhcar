@@ -9,19 +9,17 @@ TITLE = "📋 مشخصات فنی {name}"
 LINE = "{label}: {value}"
 OTHER = "سایر"
 HEAD = ("مشخصه", "مقدار")
-BTN_PRICE = "💰 قیمت امروز همین خودرو"
-BTN_BACK = "🔙 بازگشت به لیست خودروها"
-NO_PRICE = "قیمت امروز این خودرو در جدول نیست 🙏"
-PRICE_MSG = (
-    "💰 قیمت امروز {name}\n"
-    "مدل {year}: {price} میلیون تومان\n"
-    "قیمت‌ها تقریبی و بازاری است."
-)
-OLD_PRICE_MSG = (
-    "💰 قیمت {name}\n"
-    "مدل {year}: {price} میلیون تومان\n"
-    "قیمت‌ها تقریبی و بازاری است."
-)
+BTN_CHART = "📊 تغییرات قیمت"
+BTN_COMPARE = "⚖️ مقایسه خودرو"
+BTN_HOME = "🏠 بازگشت به خانه"
+CHART_SOON = "📊 بخش تغییرات قیمت به‌زودی فعال می‌شود."
+COMPARE_SOON = "⚖️ بخش مقایسه خودرو به‌زودی فعال می‌شود."
+NO_PRICE = "💰 قیمت این خودرو در جدول فعلی موجود نیست."
+PRICE_HEADER = "💰 قیمت خودرو"
+PRICE_LINE = "مدل {year}: {price} میلیون تومان"
+PRICE_NOTE = "قیمت‌ها تقریبی و بازاری است."
+OLD_DATE_LINE = "📅 مربوط به {date}"
+
 # Banner theme index per group index (order of GROUPS); last = neutral.
 THEMES = (0, 1, 2, 3, 4, 5, -1)
 

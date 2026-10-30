@@ -57,23 +57,28 @@ async def on_car(cb: CallbackQuery, settings: Settings, bot: Bot) -> None:
     title = t.TITLE.format(name=row["name"])
     pairs = specs_view.pairs(row["specs"], t.LABELS)
     group = specs_view.group_index(row["slug"], t.GROUPS)
-    markup = k.detail_kb(
-        trim_id, group, specs_price.has_price(settings, row["name"]))
+    price = specs_price.footer_text(settings, row["name"])
+    markup = k.detail_kb(trim_id)
     await specs_send.send_table(
         bot, cb.message.chat.id, title, pairs, row["name"], t.THEMES[group],
-        slug=row["slug"], markup=markup)
+        slug=row["slug"], markup=markup, price=price)
 
 
-
-@router.callback_query(F.data.regexp(r"^spec:p:\d+$"))
-async def on_price(cb: CallbackQuery, settings: Settings) -> None:
-    trim_id = int(cb.data.split(":")[2])
-    row = dbrun.run(settings, partial(repo_specs.get, trim_id=trim_id))
+@router.callback_query(F.data.regexp(r"^spec:chart:\d+$"))
+async def on_chart(cb: CallbackQuery) -> None:
     await cb.answer()
-    if row is None:
-        await cb.message.answer(t.MISSING)
-        return
-    group = specs_view.group_index(row["slug"], t.GROUPS)
-    await cb.message.answer(
-        specs_price.message_text(settings, row["name"]),
-        reply_markup=k.back_kb(group))
+    await cb.message.answer(t.CHART_SOON)
+
+
+@router.callback_query(F.data.regexp(r"^spec:compare:\d+$"))
+async def on_compare(cb: CallbackQuery) -> None:
+    await cb.answer()
+    await cb.message.answer(t.COMPARE_SOON)
+
+
+@router.callback_query(F.data == "spec:home")
+async def on_home(cb: CallbackQuery) -> None:
+    from app.adapters.telegram.keyboards.main_menu import main_menu
+    from app.adapters.telegram.texts import menu
+    await cb.answer()
+    await cb.message.answer(menu.WELCOME, reply_markup=main_menu())

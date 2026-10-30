@@ -28,14 +28,17 @@ def test_lookup_none_without_price_or_name():
     assert price_lookup.lookup(ROWS, "رانا LX") is None
     assert price_lookup.lookup(ROWS, "ناشناس") is None
 
+def test_detail_kb_new_buttons():
+    from app.adapters.telegram.keyboards import specs as k
+    from app.adapters.telegram.texts import specs as t
+    kb = k.detail_kb(7)
+    texts = [b.text for row in kb.inline_keyboard for b in row]
+    data = [b.callback_data for row in kb.inline_keyboard for b in row]
+    assert t.BTN_CHART in texts
+    assert t.BTN_COMPARE in texts
+    assert t.BTN_HOME in texts
+    assert "spec:chart:7" in data
+    assert "spec:compare:7" in data
+    assert "spec:home" in data
+    assert not any(d.startswith("spec:p:") for d in data)
 
-def test_detail_kb_with_price():
-    assert _data(k.detail_kb(7, 2, True)) == ["spec:p:7", "spec:g:2"]
-
-
-def test_detail_kb_without_price():
-    assert _data(k.detail_kb(7, 2, False)) == ["spec:g:2"]
-
-
-def test_back_kb():
-    assert _data(k.back_kb(3)) == ["spec:g:3"]

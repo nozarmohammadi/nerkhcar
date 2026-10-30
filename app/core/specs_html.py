@@ -81,7 +81,7 @@ def slides(photo_ids: tuple) -> str:
 
 def build_html(
     title: str, pairs: list[tuple[str, str]], head: tuple,
-    banner_id: str = "", photo_ids: tuple = (),
+    banner_id: str = "", photo_ids: tuple = (), price: str = "",
 ) -> str:
     """Cover image (optional), then a two-column bordered table, Persian digits."""
     top = "<tr>" + "".join(_cell("th", h) for h in head) + "</tr>"
@@ -91,10 +91,12 @@ def build_html(
     )
     table = "<table bordered striped>" + top + body + "</table>"
     cover = f'<img src="tg://photo?id={banner_id}"/>' if banner_id else ""
-    return cover + slides(photo_ids) + table
+    foot = f"<br/>{escape(price).replace(chr(10), '<br/>')}" if price else ""
+    return cover + slides(photo_ids) + table + foot
 
 
-def build_text(title: str, pairs: list[tuple[str, str]]) -> str:
+def build_text(title: str, pairs: list[tuple[str, str]], price: str = "") -> str:
     """Plain-text fallback with the same content."""
     lines = [f"{a}: {daily_text.fa(b)}" for a, b in pairs]
-    return title + "\n\n" + "\n".join(lines)
+    body = title + "\n\n" + "\n".join(lines)
+    return body + ("\n\n" + price if price else "")

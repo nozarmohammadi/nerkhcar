@@ -19,7 +19,8 @@ def _media(key: str, data: bytes, filename: str) -> InputRichMessageMedia:
 
 
 def _rich(
-    title: str, pairs: list, cover: str, theme: int, photos: list | tuple = ()
+    title: str, pairs: list, cover: str, theme: int,
+    photos: list | tuple = (), price: str = "",
 ) -> InputRichMessage:
     """Rich message: colored cover, optional photo slideshow, then the table."""
     name = daily_text.fa(cover)
@@ -29,7 +30,7 @@ def _rich(
     for n, data in enumerate(photos, 1):
         ids.append(f"ph{n}")
         media.append(_media(ids[-1], data, f"{ids[-1]}.jpg"))
-    html = specs_html.build_html(title, pairs, t.HEAD, key, tuple(ids))
+    html = specs_html.build_html(title, pairs, t.HEAD, key, tuple(ids), price)
     return InputRichMessage(html=html, is_rtl=True, media=media)
 
 
@@ -47,15 +48,16 @@ async def _try_rich(
 
 async def send_table(
     bot: Bot, chat_id: int, title: str, pairs: list[tuple[str, str]],
-    cover: str, theme: int, slug: str = "", markup=None,
+    cover: str, theme: int, slug: str = "", markup=None, price: str = "",
 ) -> str:
     """Result: rich (native table) or text (fallback). Photos are optional."""
     photos = car_images.load(slug) if slug else []
     for use in ([photos, []] if photos else [[]]):
-        rich = _rich(title, pairs, cover, theme, use)
+        rich = _rich(title, pairs, cover, theme, use, price)
         if await _try_rich(bot, chat_id, rich, markup):
             return "rich"
     kw = {"reply_markup": markup} if markup else {}
     await bot.send_message(
-        chat_id=chat_id, text=specs_html.build_text(title, pairs), **kw)
+        chat_id=chat_id,
+        text=specs_html.build_text(title, pairs, price), **kw)
     return "text"

@@ -33,17 +33,12 @@ def cars_kb(rows: list[dict]) -> InlineKeyboardMarkup:
 
 
 
-def detail_kb(trim_id: int, group: int, has_price: bool) -> InlineKeyboardMarkup:
-    """Buttons under one car's specs: today's price (if any) and back."""
-    rows = []
-    if has_price:
-        rows.append([InlineKeyboardButton(
-            text=t.BTN_PRICE, callback_data=f"spec:p:{trim_id}")])
-    rows.append([InlineKeyboardButton(
-        text=t.BTN_BACK, callback_data=f"spec:g:{group}")])
-    return InlineKeyboardMarkup(inline_keyboard=rows)
-
-
-def back_kb(group: int) -> InlineKeyboardMarkup:
-    """Only the back button (used under the price message)."""
-    return detail_kb(0, group, False)
+def detail_kb(trim_id: int) -> InlineKeyboardMarkup:
+    """Buttons under one car's specs: chart, compare, home."""
+    return InlineKeyboardMarkup(inline_keyboard=[
+        [
+            InlineKeyboardButton(text=t.BTN_CHART, callback_data=f"spec:chart:{trim_id}"),
+            InlineKeyboardButton(text=t.BTN_COMPARE, callback_data=f"spec:compare:{trim_id}"),
+        ],
+        [InlineKeyboardButton(text=t.BTN_HOME, callback_data="spec:home")],
+    ])
