@@ -30,7 +30,11 @@ def message_text(settings: Settings, name: str) -> str:
         return cp.EXPIRED
     if hit is None:
         return t.NO_PRICE
-    text = t.PRICE_MSG.format(
+    template = t.OLD_PRICE_MSG if age == "old" else t.PRICE_MSG
+    text = template.format(
         name=name, year=daily_text.fa(hit["year"]),
         price=daily_text.fa(f"{hit['price_m']:,}"))
-    return cp.OLD_NOTE.format(date=published_date.fa(data["published_at"])) + "\n\n" + text if age == "old" else text
+    if age == "old":
+        note = cp.OLD_NOTE.format(date=published_date.fa(data["published_at"]))
+        return note + "\n\n" + text
+    return text

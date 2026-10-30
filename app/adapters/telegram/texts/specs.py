@@ -17,6 +17,11 @@ PRICE_MSG = (
     "مدل {year}: {price} میلیون تومان\n"
     "قیمت‌ها تقریبی و بازاری است."
 )
+OLD_PRICE_MSG = (
+    "💰 قیمت {name}\n"
+    "مدل {year}: {price} میلیون تومان\n"
+    "قیمت‌ها تقریبی و بازاری است."
+)
 # Banner theme index per group index (order of GROUPS); last = neutral.
 THEMES = (0, 1, 2, 3, 4, 5, -1)
 
