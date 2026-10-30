@@ -20,6 +20,16 @@ def split(rows: list[dict], groups: tuple) -> list[list[dict]]:
     return out
 
 
+def pairs(specs: dict, labels: tuple) -> list[tuple[str, str]]:
+    """(label, value) for every label that has a non-empty value."""
+    out = []
+    for key, label in labels:
+        value = str(specs.get(key) or "").strip()
+        if value:
+            out.append((label, value))
+    return out
+
+
 def render(title: str, specs: dict, labels: tuple, line_fmt: str) -> str:
     """Title plus one line per label that has a non-empty value."""
     lines = [title, ""]

@@ -8,6 +8,8 @@ BTN_GROUP = "{name} | {n}"
 TITLE = "📋 مشخصات فنی {name}"
 LINE = "{label}: {value}"
 OTHER = "سایر"
+HEAD = ("مشخصه", "مقدار")
+FOOT = "منبع: زومیت"
 
 # Group name -> source slug prefixes (first part of the Zoomit slug).
 GROUPS = (

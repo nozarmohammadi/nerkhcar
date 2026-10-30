@@ -1,7 +1,7 @@
 """Button 'technical specs': pick a brand group, a car, then show its specs."""
 from functools import partial
 
-from aiogram import F, Router
+from aiogram import Bot, F, Router
 from aiogram.fsm.context import FSMContext
 from aiogram.types import CallbackQuery, Message
 
@@ -10,6 +10,7 @@ from app.adapters.telegram.keyboards import specs as k
 from app.adapters.telegram.texts import menu
 from app.adapters.telegram.texts import specs as t
 from app.config import Settings
+from app.adapters.telegram import specs_send
 from app.core import specs_view
 from app.data import repo_specs
 
@@ -46,7 +47,7 @@ async def on_group(cb: CallbackQuery, settings: Settings) -> None:
 
 
 @router.callback_query(F.data.regexp(r"^spec:c:\d+$"))
-async def on_car(cb: CallbackQuery, settings: Settings) -> None:
+async def on_car(cb: CallbackQuery, settings: Settings, bot: Bot) -> None:
     trim_id = int(cb.data.split(":")[2])
     row = dbrun.run(settings, partial(repo_specs.get, trim_id=trim_id))
     await cb.answer()
@@ -54,5 +55,5 @@ async def on_car(cb: CallbackQuery, settings: Settings) -> None:
         await cb.message.answer(t.MISSING)
         return
     title = t.TITLE.format(name=row["name"])
-    text = specs_view.render(title, row["specs"], t.LABELS, t.LINE)
-    await cb.message.answer(text)
+    pairs = specs_view.pairs(row["specs"], t.LABELS)
+    await specs_send.send_table(bot, cb.message.chat.id, title, pairs)
