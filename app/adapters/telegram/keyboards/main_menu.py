@@ -9,5 +9,6 @@ def main_menu() -> ReplyKeyboardMarkup:
         [KeyboardButton(text=menu.BTN_CAR_PRICE)],
         [KeyboardButton(text=menu.BTN_FX_GOLD)],
         [KeyboardButton(text=menu.BTN_MY_CAR)],
+        [KeyboardButton(text=menu.BTN_SPECS)],
     ]
     return ReplyKeyboardMarkup(keyboard=rows, resize_keyboard=True)

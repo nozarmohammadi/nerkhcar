@@ -14,6 +14,6 @@ def test_check_rules_passes():
     assert result.returncode == 0, result.stdout
 
 
-def test_main_menu_has_three_buttons():
+def test_main_menu_has_four_buttons():
     from app.adapters.telegram.keyboards.main_menu import main_menu
-    assert len(main_menu().keyboard) == 3
+    assert len(main_menu().keyboard) == 4

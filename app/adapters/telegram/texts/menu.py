@@ -7,8 +7,10 @@ BTN_FX_GOLD = "💵 ارز، سکه و طلا"
 BTN_MY_CAR = "🧮 تخمین قیمت"
 # Old label: keyboards already open on phones still send it.
 BTN_MY_CAR_OLD = "🚗 قیمت خودروی من"
+BTN_SPECS = "📋 مشخصات فنی"
 MENU_BUTTONS = (
     BTN_CAR_PRICE, BTN_CAR_PRICE_OLD, BTN_FX_GOLD, BTN_MY_CAR, BTN_MY_CAR_OLD,
+    BTN_SPECS,
 )
 
 WELCOME = (
