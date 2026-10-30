@@ -1,7 +1,17 @@
 """Build the native-table html and plain text of one car's specs."""
+import re
 from html import escape
 
 from app.core import daily_text
+
+
+NBSP = "\u00a0"
+
+
+def glue(text: str) -> str:
+    """Keep a year with its word and a number with its unit on one line."""
+    text = re.sub(r"(\S) (\d+)$", "\\1" + NBSP + "\\2", text)
+    return re.sub(r"(\d) (\S+)$", "\\1" + NBSP + "\\2", text)
 
 
 def _cell(tag: str, value: str) -> str:
@@ -14,7 +24,7 @@ def build_html(
     """Cover image (optional), then a two-column bordered table, Persian digits."""
     top = "<tr>" + "".join(_cell("th", h) for h in head) + "</tr>"
     body = "".join(
-        "<tr>" + _cell("td", a) + _cell("td", daily_text.fa(b)) + "</tr>"
+        "<tr>" + _cell("td", a) + _cell("td", glue(daily_text.fa(b))) + "</tr>"
         for a, b in pairs
     )
     table = "<table bordered striped>" + top + body + "</table>"
