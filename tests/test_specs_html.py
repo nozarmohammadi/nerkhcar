@@ -10,17 +10,17 @@ def test_pairs_skip_empty():
 
 
 def test_html_has_table_and_persian_digits():
-    html = specs_html.build_html("T", [("LA", "5 door")], ("H1", "H2"), "F")
+    html = specs_html.build_html("T", [("LA", "5 door")], ("H1", "H2"))
     assert "<table bordered striped>" in html
     assert "<th>H1</th>" in html
     assert "۵" in html
 
 
 def test_html_escapes():
-    html = specs_html.build_html("T", [("L", "<b>")], ("H1", "H2"), "F")
+    html = specs_html.build_html("T", [("L", "<b>")], ("H1", "H2"))
     assert "<b>" not in html.split("<td>")[2]
 
 
 def test_text_fallback():
-    text = specs_html.build_text("T", [("LA", "5")], "F")
-    assert text.startswith("T") and "LA: ۵" in text and text.endswith("F")
+    text = specs_html.build_text("T", [("LA", "5")])
+    assert text.startswith("T") and "LA: ۵" in text and text.endswith("LA: ۵")

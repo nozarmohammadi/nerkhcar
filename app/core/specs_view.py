@@ -6,6 +6,15 @@ def prefix(slug: str) -> str:
     return str(slug).split("-")[0]
 
 
+def group_index(slug: str, groups: tuple) -> int:
+    """Group index of a slug; len(groups) means unmapped."""
+    head = prefix(slug)
+    for i, (_, prefixes) in enumerate(groups):
+        if head in prefixes:
+            return i
+    return len(groups)
+
+
 def names(groups: tuple, other: str) -> list[str]:
     """Group names by index; the last entry names the unmapped cars."""
     return [name for name, _ in groups] + [other]

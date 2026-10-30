@@ -22,9 +22,10 @@ def list_reviewed(conn: sqlite3.Connection) -> list[dict]:
 def get(conn: sqlite3.Connection, trim_id: int) -> dict | None:
     """Name and parsed specs of one reviewed car, or None."""
     row = conn.execute(
-        "SELECT m.name AS name, c.specs_json AS js " + _BASE
+        "SELECT m.name AS name, c.source_slug AS slug, c.specs_json AS js " + _BASE
         + " AND c.trim_id=?", (trim_id,)
     ).fetchone()
     if row is None:
         return None
-    return {"name": row["name"], "specs": json.loads(row["js"])}
+    return {"name": row["name"], "slug": row["slug"],
+            "specs": json.loads(row["js"])}

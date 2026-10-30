@@ -9,7 +9,8 @@ TITLE = "📋 مشخصات فنی {name}"
 LINE = "{label}: {value}"
 OTHER = "سایر"
 HEAD = ("مشخصه", "مقدار")
-FOOT = "منبع: زومیت"
+# Banner theme index per group index (order of GROUPS); last = neutral.
+THEMES = (0, 1, 2, 3, 4, 5, -1)
 
 # Group name -> source slug prefixes (first part of the Zoomit slug).
 GROUPS = (

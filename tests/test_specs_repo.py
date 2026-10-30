@@ -34,6 +34,6 @@ def test_list_only_reviewed():
 def test_get_reviewed_and_unreviewed():
     conn = _db()
     got = repo_specs.get(conn, 10)
-    assert got == {"name": "m1", "specs": {"seats": "5"}}
+    assert got == {"name": "m1", "slug": "saipa-111", "specs": {"seats": "5"}}
     assert repo_specs.get(conn, 20) is None
     assert repo_specs.get(conn, 999) is None
