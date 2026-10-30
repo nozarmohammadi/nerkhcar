@@ -35,12 +35,28 @@ def _short_series(value: str, cfg: dict) -> str:
     return head + cfg["series_join"] + year
 
 
+def _cut(value: str, cfg: dict) -> str:
+    """Drop the glued-on extra text that starts at a known marker."""
+    for marker in cfg["cut_at"]:
+        value = value.split(marker)[0]
+    return value.strip()
+
+
+def _short_rpm(label: str, value: str, cfg: dict) -> str:
+    """Turn 'N unit at R rpm' into 'N unit (R rpm)' for power and torque."""
+    if label not in cfg["rpm_keys"] or cfg["rpm_sep"] not in value:
+        return value
+    head, tail = value.split(cfg["rpm_sep"], 1)
+    return head + " (" + tail.replace(cfg["rpm_in"], cfg["rpm_out"][:-1]) + ")"
+
+
 def compact(pairs: list) -> list:
     """Shorten long left-column texts so they fit on one line."""
     cfg = _cfg()
     out = []
     for a, b in pairs:
-        a, b = _move_unit(a, str(b), cfg["units"])
+        b = _short_rpm(a, _cut(str(b), cfg), cfg)
+        a, b = _move_unit(a, b, cfg["units"])
         out.append((a, _short_series(b, cfg)))
     return out
 

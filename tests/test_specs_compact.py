@@ -19,3 +19,14 @@ def test_series_is_short():
 
 def test_plain_value_untouched():
     assert compact([("k", "plain")]) == [("k", "plain")]
+
+
+def test_glued_tail_is_cut():
+    marker = CFG["cut_at"][0]
+    assert compact([("k", f"abc {marker} xyz")]) == [("k", "abc")]
+
+
+def test_rpm_is_short():
+    key, sep = CFG["rpm_keys"][0], CFG["rpm_sep"]
+    out = compact([(key, f"104{sep}5500{CFG['rpm_in']}")])
+    assert out[0][1] == "104 (5500" + CFG["rpm_out"][:-1] + ")"
