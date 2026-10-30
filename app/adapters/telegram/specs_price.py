@@ -3,7 +3,7 @@ from app.adapters.telegram import dbrun
 from app.adapters.telegram.texts import car_price as cp
 from app.adapters.telegram.texts import specs as t
 from app.config import Settings
-from app.core import daily_text, price_age, price_lookup
+from app.core import daily_text, price_age, price_lookup, published_date
 from app.data import repo_published
 
 
@@ -33,4 +33,4 @@ def message_text(settings: Settings, name: str) -> str:
     text = t.PRICE_MSG.format(
         name=name, year=daily_text.fa(hit["year"]),
         price=daily_text.fa(f"{hit['price_m']:,}"))
-    return cp.OLD_NOTE + "\n\n" + text if age == "old" else text
+    return cp.OLD_NOTE.format(date=published_date.fa(data["published_at"])) + "\n\n" + text if age == "old" else text
