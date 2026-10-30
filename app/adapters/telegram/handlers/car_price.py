@@ -9,7 +9,7 @@ from app.adapters.telegram.texts import car_price as t
 from app.adapters.telegram.texts import daily_prices as dp
 from app.adapters.telegram.texts import menu
 from app.config import Settings
-from app.core import brand_groups, brand_map, price_age, published_view
+from app.core import brand_groups, brand_map, price_age, published_date, published_view
 from app.data import repo_published
 
 router = Router()
@@ -25,7 +25,10 @@ def _ready(settings: Settings) -> tuple[dict | None, str | None]:
     age = price_age.status(data["published_at"])
     if age == "expired":
         return None, t.EXPIRED
-    return data, (t.OLD_NOTE if age == "old" else None)
+    if age == "old":
+        note = t.OLD_NOTE.format(date=published_date.fa(data["published_at"]))
+        return data, note
+    return data, None
 
 
 async def _send(bot: Bot, chat_id: int, data: dict, rows: list[dict]) -> None:

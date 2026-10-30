@@ -43,7 +43,9 @@ def test_fresh_sends_table_only(monkeypatch):
 
 def test_old_warns_then_table(monkeypatch):
     sent, calls = run(monkeypatch, 40)
-    assert sent == [t.OLD_NOTE] and len(calls) == 1
+    assert len(sent) == 1 and len(calls) == 1
+    assert "{date}" not in sent[0]
+    assert "مربوط به" in sent[0]
 
 
 def test_expired_no_table(monkeypatch):
