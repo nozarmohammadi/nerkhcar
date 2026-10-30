@@ -9,6 +9,14 @@ TITLE = "📋 مشخصات فنی {name}"
 LINE = "{label}: {value}"
 OTHER = "سایر"
 HEAD = ("مشخصه", "مقدار")
+BTN_PRICE = "💰 قیمت امروز همین خودرو"
+BTN_BACK = "🔙 بازگشت به لیست خودروها"
+NO_PRICE = "قیمت امروز این خودرو در جدول نیست 🙏"
+PRICE_MSG = (
+    "💰 قیمت امروز {name}\n"
+    "مدل {year}: {price} میلیون تومان\n"
+    "قیمت‌ها تقریبی و بازاری است."
+)
 # Banner theme index per group index (order of GROUPS); last = neutral.
 THEMES = (0, 1, 2, 3, 4, 5, -1)
 

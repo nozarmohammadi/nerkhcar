@@ -10,7 +10,7 @@ from app.adapters.telegram.keyboards import specs as k
 from app.adapters.telegram.texts import menu
 from app.adapters.telegram.texts import specs as t
 from app.config import Settings
-from app.adapters.telegram import specs_send
+from app.adapters.telegram import specs_price, specs_send
 from app.core import specs_view
 from app.data import repo_specs
 
@@ -56,7 +56,24 @@ async def on_car(cb: CallbackQuery, settings: Settings, bot: Bot) -> None:
         return
     title = t.TITLE.format(name=row["name"])
     pairs = specs_view.pairs(row["specs"], t.LABELS)
-    theme = t.THEMES[specs_view.group_index(row["slug"], t.GROUPS)]
+    group = specs_view.group_index(row["slug"], t.GROUPS)
+    markup = k.detail_kb(
+        trim_id, group, specs_price.has_price(settings, row["name"]))
     await specs_send.send_table(
-        bot, cb.message.chat.id, title, pairs, row["name"], theme,
-        slug=row["slug"])
+        bot, cb.message.chat.id, title, pairs, row["name"], t.THEMES[group],
+        slug=row["slug"], markup=markup)
+
+
+
+@router.callback_query(F.data.regexp(r"^spec:p:\d+$"))
+async def on_price(cb: CallbackQuery, settings: Settings) -> None:
+    trim_id = int(cb.data.split(":")[2])
+    row = dbrun.run(settings, partial(repo_specs.get, trim_id=trim_id))
+    await cb.answer()
+    if row is None:
+        await cb.message.answer(t.MISSING)
+        return
+    group = specs_view.group_index(row["slug"], t.GROUPS)
+    await cb.message.answer(
+        specs_price.message_text(settings, row["name"]),
+        reply_markup=k.back_kb(group))

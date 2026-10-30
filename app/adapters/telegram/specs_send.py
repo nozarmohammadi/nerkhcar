@@ -33,9 +33,12 @@ def _rich(
     return InputRichMessage(html=html, is_rtl=True, media=media)
 
 
-async def _try_rich(bot: Bot, chat_id: int, rich: InputRichMessage) -> bool:
+async def _try_rich(
+    bot: Bot, chat_id: int, rich: InputRichMessage, markup=None
+) -> bool:
+    kw = {"reply_markup": markup} if markup else {}
     try:
-        await bot.send_rich_message(chat_id=chat_id, rich_message=rich)
+        await bot.send_rich_message(chat_id=chat_id, rich_message=rich, **kw)
         return True
     except TelegramAPIError as exc:
         log.warning("specs table not sent: %s", exc)
@@ -44,13 +47,15 @@ async def _try_rich(bot: Bot, chat_id: int, rich: InputRichMessage) -> bool:
 
 async def send_table(
     bot: Bot, chat_id: int, title: str, pairs: list[tuple[str, str]],
-    cover: str, theme: int, slug: str = "",
+    cover: str, theme: int, slug: str = "", markup=None,
 ) -> str:
     """Result: rich (native table) or text (fallback). Photos are optional."""
     photos = car_images.load(slug) if slug else []
     for use in ([photos, []] if photos else [[]]):
-        if await _try_rich(bot, chat_id, _rich(title, pairs, cover, theme, use)):
+        rich = _rich(title, pairs, cover, theme, use)
+        if await _try_rich(bot, chat_id, rich, markup):
             return "rich"
+    kw = {"reply_markup": markup} if markup else {}
     await bot.send_message(
-        chat_id=chat_id, text=specs_html.build_text(title, pairs))
+        chat_id=chat_id, text=specs_html.build_text(title, pairs), **kw)
     return "text"

@@ -1,6 +1,7 @@
 """Keyboards of the 'technical specs' button (short numeric callback_data)."""
 from aiogram.types import InlineKeyboardButton, InlineKeyboardMarkup
 
+from app.adapters.telegram.texts import specs as t
 from app.core import daily_text
 
 # Telegram allows at most 100 buttons in one inline keyboard.
@@ -29,3 +30,20 @@ def cars_kb(rows: list[dict]) -> InlineKeyboardMarkup:
         for r in rows[:MAX_BUTTONS]
     ]
     return InlineKeyboardMarkup(inline_keyboard=buttons)
+
+
+
+def detail_kb(trim_id: int, group: int, has_price: bool) -> InlineKeyboardMarkup:
+    """Buttons under one car's specs: today's price (if any) and back."""
+    rows = []
+    if has_price:
+        rows.append([InlineKeyboardButton(
+            text=t.BTN_PRICE, callback_data=f"spec:p:{trim_id}")])
+    rows.append([InlineKeyboardButton(
+        text=t.BTN_BACK, callback_data=f"spec:g:{group}")])
+    return InlineKeyboardMarkup(inline_keyboard=rows)
+
+
+def back_kb(group: int) -> InlineKeyboardMarkup:
+    """Only the back button (used under the price message)."""
+    return detail_kb(0, group, False)
