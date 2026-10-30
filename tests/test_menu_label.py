@@ -27,4 +27,4 @@ def test_same_words_after_the_emoji():
 
 def test_other_buttons_unchanged():
     assert menu.BTN_FX_GOLD.startswith("\U0001F4B5")
-    assert menu.BTN_MY_CAR.startswith("\U0001F697")
+    assert menu.BTN_MY_CAR.startswith("\U0001F9EE")

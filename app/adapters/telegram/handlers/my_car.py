@@ -19,7 +19,7 @@ from app.data import repo_published
 router = Router()
 router.message.filter(F.chat.type == "private")
 router.callback_query.filter(F.message.chat.type == "private")
-@router.message(F.text == menu.BTN_MY_CAR)
+@router.message(F.text.in_({menu.BTN_MY_CAR, menu.BTN_MY_CAR_OLD}))
 async def on_start(message: Message, settings: Settings, state: FSMContext) -> None:
     await state.clear()
     catalog = dbrun.run(settings, repo_catalog.list_user_trims)
