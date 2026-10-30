@@ -45,16 +45,17 @@ async def on_car_price(
     if data is None:
         await message.answer(note)
         return
-    if note:
-        await message.answer(note)
     rows = data["rows"]
     if not brand_groups.has_brands(rows):
+        if note:
+            await message.answer(note)
         await _send(bot, message.chat.id, data, rows)
         return
     items = brand_map.menu(rows, dp.BRAND_GROUPS)
     names = brand_map.names(dp.BRAND_GROUPS, dp.OTHER_BRAND)
+    text = (note + "\n\n" + t.PICK_GROUP) if note else t.PICK_GROUP
     await message.answer(
-        t.PICK_GROUP, reply_markup=k.groups_kb(items, names, t.BTN_GROUP, t.GROUP_STYLES))
+        text, reply_markup=k.groups_kb(items, names, t.BTN_GROUP, t.GROUP_STYLES))
 
 
 @router.callback_query(F.data.regexp(r"^cp:g:\d+$"))
