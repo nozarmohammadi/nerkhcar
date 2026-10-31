@@ -1,9 +1,16 @@
 // Tab 1: prices (fx strip, search, brand chips, list).
 (function () {
   var U = NK.U, T = NK.T, P = NK.P;
+  // Full toman value for fx item i (dollar, coin, gold); soon label when no fresh data.
+  function fxText(i) {
+    var fx = NK.S.fx, key = ['dollar', 'coin', 'gold'][i], v = null;
+    ((fx && fx.rows) || []).forEach(function (r) { if (r.key === key) v = Number(r.toman); });
+    if (!v || !isFinite(v)) return T.fx.soon;
+    try { return Math.round(v).toLocaleString('fa-IR'); } catch (e) { return String(Math.round(v)); }
+  }
   function fxStrip() {
-    return U.h('div', 'c-fx', null, T.fx.items.map(function (n) {
-      return U.h('div', 'c-fx__item', null, [U.h('span', 'c-note', n), U.h('b', 'c-fx__value', T.fx.soon)]);
+    return U.h('div', 'c-fx', null, T.fx.items.map(function (n, i) {
+      return U.h('div', 'c-fx__item', null, [U.h('span', 'c-note', n), U.h('b', 'c-fx__value', fxText(i))]);
     }));
   }
   function filtered() {

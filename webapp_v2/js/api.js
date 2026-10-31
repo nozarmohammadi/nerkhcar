@@ -15,6 +15,7 @@ window.NK = window.NK || {};
   }
   NK.api = {
     prices: function () { return useMock ? Promise.resolve(NK.mock) : call('/api/prices/daily'); },
+    fx: function () { return useMock ? Promise.resolve({ status: 'empty', rows: [] }) : call('/api/fx'); },
     estimate: function (body) {
       if (useMock) return Promise.resolve({ low: 900, high: 1000 });
       return call('/api/estimate', { method: 'POST', body: JSON.stringify(body) });

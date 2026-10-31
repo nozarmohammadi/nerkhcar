@@ -4,6 +4,12 @@
   var S = NK.S = { page: 'prices', carId: null, q: '', brand: '', cmp: [null, null], my: [],
                    status: 'loading', rows: [], src: '', est: { id: null, km: '', cond: 0, res: null } };
   NK.TABS = ['prices', 'compare', 'estimate', 'my', 'more'];
+  // Loads dollar/coin/gold separately; any failure leaves S.fx empty (strip shows the soon label).
+  NK.loadFx = async function () {
+    try { var d = await NK.api.fx(); NK.S.fx = d && d.status === 'ok' ? d : null; }
+    catch (e) { NK.S.fx = null; }
+    if (NK.S.page === 'prices') NK.draw();
+  };
   NK.byId = function (id) { return S.rows.filter(function (r) { return String(r.id) === String(id); })[0]; };
   NK.go = function (p) { S.page = p; NK.draw(); };
   NK.openCar = function (id) { S.carId = id; NK.go('car'); };
@@ -32,6 +38,7 @@
   NK.load = async function () {
     S.status = 'loading'; NK.draw();
     try {
+      NK.loadFx();
       var d = await NK.api.prices();
       S.rows = (d.rows || []).map(function (r, i) { return Object.assign({ id: r.trim_id != null ? r.trim_id : i }, r); });
       S.status = d.status || 'ok';

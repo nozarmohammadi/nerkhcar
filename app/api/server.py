@@ -6,7 +6,7 @@ from pathlib import Path
 
 from aiohttp import web
 
-from app.api import auth, prices
+from app.api import auth, fx, prices
 from app.api.db_ro import connect_ro
 from app.config import load_settings
 
@@ -22,11 +22,12 @@ async def health(request: web.Request) -> web.Response:
     return web.json_response({"ok": True}, headers=NO_STORE)
 
 
-async def daily_prices(request: web.Request) -> web.Response:
+async def _serve(request: web.Request, reader) -> web.Response:
+    """Run a read-only reader(conn) and return its dict as JSON."""
     try:
         conn = connect_ro(request.app["db_path"])
         try:
-            data = prices.daily(conn)
+            data = reader(conn)
         finally:
             conn.close()
     except sqlite3.Error as exc:
@@ -35,12 +36,21 @@ async def daily_prices(request: web.Request) -> web.Response:
     return web.json_response(data, headers=NO_STORE)
 
 
+async def daily_prices(request: web.Request) -> web.Response:
+    return await _serve(request, prices.daily)
+
+
+async def fx_prices(request: web.Request) -> web.Response:
+    return await _serve(request, fx.latest)
+
+
 def build_app(db_path=DEFAULT_DB, bot_token="") -> web.Application:
     app = web.Application()
     app["db_path"] = str(db_path)
     app["bot_token"] = bot_token
     app.router.add_get("/api/health", health)
     app.router.add_get("/api/prices/daily", daily_prices)
+    app.router.add_get("/api/fx", fx_prices)
     app.router.add_get("/api/me", auth.me)
     return app
 
