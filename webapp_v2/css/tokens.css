@@ -1,0 +1,36 @@
+/* TOKENS: the only place for colors, spacing, radius, fonts, icon size. */
+:root {
+  /* color (light) */
+  --c-bg: #FBFCFB;
+  --c-surface: #FFFFFF;
+  --c-text: #0F1B17;
+  --c-muted: #667570;
+  --c-line: #E6EBE8;
+  --c-primary: #0B5D4B;
+  --c-on-primary: #FFFFFF;
+  --c-accent: #A98C5E;
+  --c-danger: #B4413A;
+  /* space */
+  --s-1: 4px; --s-2: 8px; --s-3: 12px; --s-4: 16px; --s-5: 24px;
+  /* radius */
+  --r-1: 10px; --r-2: 14px; --r-pill: 99px;
+  /* font */
+  --font: system-ui, Tahoma, sans-serif;
+  --f-xs: 11px; --f-sm: 12px; --f-md: 14px; --f-lg: 18px; --f-xl: 22px; --f-xxl: 34px;
+  /* icon */
+  --icon-size: 22px; --icon-stroke: 1.7;
+  /* layout */
+  --app-width: 390px; --tabbar-h: 64px;
+}
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) {
+    --c-bg: #0D1512; --c-surface: #141F1B; --c-text: #EAF0ED; --c-muted: #8FA29B;
+    --c-line: #22302A; --c-primary: #2FA58A; --c-on-primary: #08130F;
+    --c-accent: #C9AD7C; --c-danger: #E0716A;
+  }
+}
+:root[data-theme="dark"] {
+  --c-bg: #0D1512; --c-surface: #141F1B; --c-text: #EAF0ED; --c-muted: #8FA29B;
+  --c-line: #22302A; --c-primary: #2FA58A; --c-on-primary: #08130F;
+  --c-accent: #C9AD7C; --c-danger: #E0716A;
+}
