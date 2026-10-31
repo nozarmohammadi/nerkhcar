@@ -1,21 +1,29 @@
 /* TOKENS: the only place for colors, spacing, radius, fonts, icon size. */
+@font-face {
+  font-family: 'Vazirmatn';
+  src: url('../fonts/Vazirmatn-Variable-v33.003.woff2') format('woff2');
+  font-weight: 100 900; font-display: swap;
+}
 :root {
   /* color (light) */
-  --c-bg: #FBFCFB;
+  --c-bg: #F3F7FC;
   --c-surface: #FFFFFF;
-  --c-text: #0F1B17;
-  --c-muted: #667570;
-  --c-line: #E6EBE8;
-  --c-primary: #0B5D4B;
+  --c-text: #0B0F1A;
+  --c-muted: #556579;
+  --c-line: #D9E4F2;
+  --c-primary: #0F2A52;
   --c-on-primary: #FFFFFF;
-  --c-accent: #A98C5E;
+  --c-accent: #C9A24B;
+  --c-soft: #E3EEFB;
+  --c-accent-text: #7A5C14;
+  --c-on-accent: #0A1B38;
   --c-danger: #B4413A;
   /* space */
   --s-1: 4px; --s-2: 8px; --s-3: 12px; --s-4: 16px; --s-5: 24px;
   /* radius */
-  --r-1: 10px; --r-2: 14px; --r-pill: 99px;
+  --r-1: 10px; --r-2: 14px; --r-3: 24px; --r-pill: 99px;
   /* font */
-  --font: system-ui, Tahoma, sans-serif;
+  --font: 'Vazirmatn', system-ui, Tahoma, sans-serif;
   --f-xs: 11px; --f-sm: 12px; --f-md: 14px; --f-lg: 18px; --f-xl: 22px; --f-xxl: 34px;
   /* icon */
   --icon-size: 22px; --icon-stroke: 1.7;
@@ -24,13 +32,13 @@
 }
 @media (prefers-color-scheme: dark) {
   :root:not([data-theme="light"]) {
-    --c-bg: #0D1512; --c-surface: #141F1B; --c-text: #EAF0ED; --c-muted: #8FA29B;
-    --c-line: #22302A; --c-primary: #2FA58A; --c-on-primary: #08130F;
-    --c-accent: #C9AD7C; --c-danger: #E0716A;
+    --c-bg: #0A1424; --c-surface: #11203A; --c-text: #EAF0F8; --c-muted: #9DB0C8;
+    --c-line: #1E3050; --c-primary: #6FA8E8; --c-on-primary: #07142A;
+    --c-accent: #D8B866; --c-danger: #E0716A; --c-soft: #1A2F52; --c-accent-text: #D8B866; --c-on-accent: #07142A;
   }
 }
 :root[data-theme="dark"] {
-  --c-bg: #0D1512; --c-surface: #141F1B; --c-text: #EAF0ED; --c-muted: #8FA29B;
-  --c-line: #22302A; --c-primary: #2FA58A; --c-on-primary: #08130F;
-  --c-accent: #C9AD7C; --c-danger: #E0716A;
+  --c-bg: #0A1424; --c-surface: #11203A; --c-text: #EAF0F8; --c-muted: #9DB0C8;
+  --c-line: #1E3050; --c-primary: #6FA8E8; --c-on-primary: #07142A;
+  --c-accent: #D8B866; --c-danger: #E0716A; --c-soft: #1A2F52; --c-accent-text: #D8B866; --c-on-accent: #07142A;
 }

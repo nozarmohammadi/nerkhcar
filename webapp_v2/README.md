@@ -10,7 +10,7 @@
 | یک صفحه | js/pages/NAME.js |
 
 ## رنگ‌ها (tokens.css)
---c-bg پس‌زمینه | --c-surface کارت و نوار | --c-text متن | --c-muted خاکستری | --c-line خط | --c-primary سبز اصلی | --c-on-primary متن روی سبز | --c-accent طلایی | --c-danger قرمز.
+--c-bg پس‌زمینه | --c-surface کارت و نوار | --c-text متن | --c-muted خاکستری | --c-line خط | --c-primary سورمه‌ای اصلی | --c-on-primary متن روی آن | --c-accent طلایی | --c-accent-text طلایی تیره برای متن | --c-on-accent متن روی طلایی | --c-soft آبی کم‌رنگ | --c-danger قرمز. گردی --r-3 برای کارت.
 حالت تاریک: همان نام‌ها، مقدار دیگر. فاصله --s-1..5 | گردی --r-1, --r-2, --r-pill | فونت --f-xs..xxl | آیکون --icon-size, --icon-stroke.
 
 ## آیکون‌ها (icons.js)

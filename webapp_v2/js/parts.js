@@ -9,8 +9,8 @@ NK.P = (function () {
     return U.h('div', 'c-price' + (big ? ' c-price--big' : ''), null, [
       U.h('span', 'c-price__num', U.fa(d.price_m)), U.h('span', 'c-price__unit', T.prices.unit)]);
   }
-  function row(d) {
-    var main = U.h('div', 'c-row__main', null, [U.h('b', 'c-row__name', d.name), U.h('span', 'c-row__sub', sub(d))]);
+  function row(d, short) {
+    var main = U.h('div', 'c-row__main', null, [U.h('b', 'c-row__name', d.name), U.h('span', 'c-row__sub', short ? U.year(d.year) : sub(d))]);
     return U.on(U.h('div', 'c-row', null, [main, price(d)]), function () { NK.openCar(d.id); });
   }
   function empty(msg, hint, label, fn) {

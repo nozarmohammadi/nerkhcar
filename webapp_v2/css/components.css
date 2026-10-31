@@ -22,7 +22,7 @@ body { background: var(--c-bg); color: var(--c-text); font-size: var(--f-md); }
 
 /* chip */
 .c-chips { display: flex; gap: var(--s-2); overflow-x: auto; }
-.c-chip { white-space: nowrap; padding: 6px var(--s-3); border: 1px solid var(--c-line); border-radius: var(--r-pill); font-size: var(--f-sm); color: var(--c-muted); background: var(--c-surface); }
+.c-chip { white-space: nowrap; display: inline-flex; align-items: center; min-height: 44px; padding: 0 var(--s-3); border: 1px solid var(--c-line); border-radius: var(--r-pill); font-size: var(--f-sm); color: var(--c-muted); background: var(--c-surface); }
 .c-chip--on { background: var(--c-primary); border-color: var(--c-primary); color: var(--c-on-primary); }
 
 /* price */
@@ -42,7 +42,7 @@ body { background: var(--c-bg); color: var(--c-text); font-size: var(--f-md); }
 /* card (fx tile, result) */
 .c-fx { display: flex; gap: var(--s-2); }
 .c-fx__item { flex: 1; display: flex; flex-direction: column; gap: 2px; padding: var(--s-2); border: 1px solid var(--c-line); border-radius: var(--r-1); background: var(--c-surface); }
-.c-fx__value { font-size: var(--f-sm); color: var(--c-accent); }
+.c-fx__value { font-size: var(--f-sm); color: var(--c-accent-text); }
 .c-result { padding: var(--s-3); border: 1px solid var(--c-accent); border-radius: var(--r-2); background: var(--c-surface); display: flex; flex-direction: column; gap: var(--s-2); }
 
 /* table */
@@ -57,9 +57,24 @@ body { background: var(--c-bg); color: var(--c-text); font-size: var(--f-md); }
 @keyframes c-pulse { 50% { opacity: .45; } }
 
 /* tabbar */
-.c-tabbar { position: fixed; bottom: 0; left: 50%; transform: translateX(-50%); width: 100%; max-width: var(--app-width); display: flex; background: var(--c-surface); border-top: 1px solid var(--c-line); padding-bottom: env(safe-area-inset-bottom, 0px); }
-.c-tab { flex: 1; display: flex; flex-direction: column; align-items: center; gap: 3px; padding: var(--s-2) 0; background: none; border: 0; font-size: var(--f-xs); color: var(--c-muted); }
-.c-tab--on { color: var(--c-primary); }
+.c-tabbar { position: fixed; bottom: 0; left: 50%; transform: translateX(-50%); width: 100%; max-width: var(--app-width); display: flex; background: var(--c-surface); border-top: 1px solid var(--c-line); border-radius: var(--r-3) var(--r-3) 0 0; padding-bottom: env(safe-area-inset-bottom, 0px); }
+.c-tab { flex: 1; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 3px; min-height: 52px; margin: 6px 4px; padding: var(--s-2) 0; background: none; border: 0; border-radius: var(--r-2); font-size: var(--f-xs); color: var(--c-muted); }
+.c-tab--on { color: var(--c-primary); background: var(--c-soft); font-weight: 700; }
 
 /* icon */
 .c-icon { width: var(--icon-size); height: var(--icon-size); fill: none; stroke: currentColor; stroke-width: var(--icon-stroke); stroke-linecap: round; stroke-linejoin: round; }
+
+/* prices page: header, brand card, cta */
+.l-stack { display: flex; flex-direction: column; gap: var(--s-3); }
+.c-hd { margin: calc(var(--s-4) * -1) calc(var(--s-4) * -1) 0; padding: var(--s-5) var(--s-4) var(--s-4); background: var(--c-primary); color: var(--c-on-primary); border-radius: 0 0 var(--r-3) var(--r-3); }
+.c-card { padding: var(--s-1) var(--s-4); border: 1px solid var(--c-line); border-radius: var(--r-3); background: var(--c-surface); }
+.c-card__head { display: flex; align-items: center; gap: var(--s-2); padding: var(--s-3) 0 var(--s-2); }
+.c-card__bar { width: 4px; height: 16px; border-radius: 4px; background: var(--c-accent); }
+.c-card__name { font-size: var(--f-md); color: var(--c-primary); }
+.c-card .c-row { min-height: 44px; }
+.c-card .c-row:last-child { border-bottom: 0; }
+.c-cta { display: flex; justify-content: space-between; align-items: center; width: 100%; padding: var(--s-3) var(--s-4); border: 0; border-radius: var(--r-3); background: var(--c-primary); color: var(--c-on-primary); text-align: right; font-size: var(--f-md); }
+.c-cta > div { display: flex; flex-direction: column; gap: 2px; }
+.c-cta__sub { font-size: var(--f-xs); opacity: .8; }
+.c-cta__plus { width: 44px; height: 44px; display: flex; align-items: center; justify-content: center; border-radius: var(--r-2); background: var(--c-accent); color: var(--c-on-accent); font-size: var(--f-xl); }
+.c-cta__title { font-weight: 700; }

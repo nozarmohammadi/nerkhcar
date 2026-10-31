@@ -39,9 +39,15 @@
     if (!linked) { applyLink(); linked = true; }
     NK.draw();
   };
+  // Telegram top bar: navy header, so the bar matches the page header.
+  function paintBar(tg) {
+    var navy = getComputedStyle(document.documentElement).getPropertyValue('--c-primary').trim();
+    if (!navy) return;
+    try { tg.setHeaderColor(navy); tg.setBackgroundColor(navy); } catch (e) { /* old client */ }
+  }
   (function init() {
     var tg = window.Telegram && Telegram.WebApp;
-    if (tg) { tg.ready(); tg.expand(); if (tg.colorScheme) document.documentElement.dataset.theme = tg.colorScheme; }
+    if (tg) { tg.ready(); tg.expand(); if (tg.colorScheme) document.documentElement.dataset.theme = tg.colorScheme; paintBar(tg); }
     document.title = T.app;
     NK.load();
   })();

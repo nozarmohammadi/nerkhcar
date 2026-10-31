@@ -12,12 +12,31 @@
       return (!S.brand || r.brand === S.brand) && r.name.indexOf(S.q) !== -1;
     });
   }
+  function groups(rows) {
+    var order = [], by = {};
+    rows.forEach(function (r) {
+      var b = r.brand || '';
+      if (!by[b]) { by[b] = []; order.push(b); }
+      by[b].push(r);
+    });
+    return U.h('div', 'l-stack', null, order.map(function (b) {
+      var head = U.h('div', 'c-card__head', null, [U.h('span', 'c-card__bar'), U.h('b', 'c-card__name', b)]);
+      return U.h('section', 'c-card', null, [head].concat(by[b].map(function (d) { return P.row(d, true); })));
+    }));
+  }
+  function cta() {
+    var txt = U.h('div', null, null, [U.h('b', 'c-cta__title', T.prices.myTitle), U.h('span', 'c-cta__sub', T.prices.mySub)]);
+    var b = U.h('button', 'c-cta', null, [txt, U.h('span', 'c-cta__plus', '+')]);
+    b.setAttribute('aria-label', T.prices.myTitle);
+    b.addEventListener('click', function () { NK.S.page = 'my'; NK.draw(); });
+    return b;
+  }
   function list() {
     var st = P.state();
     if (st) return st;
     var rows = filtered();
     if (!rows.length) return P.empty(T.state.empty);
-    return U.h('div', null, null, rows.map(P.row));
+    return groups(rows);
   }
   function chips() {
     var S = NK.S, box = U.h('div', 'c-chips');
@@ -33,6 +52,6 @@
     q.placeholder = T.prices.search;
     q.value = NK.S.q;
     q.addEventListener('input', function () { NK.S.q = q.value; box.replaceChildren(list()); });
-    return U.h('div', 'l-page', null, [P.title(T.app), fxStrip(), q, chips(), box, P.note(T.disc)]);
+    return U.h('div', 'l-page', null, [U.h('div', 'c-hd', null, [P.title(T.app)]), fxStrip(), q, chips(), box, cta(), P.note(T.disc)]);
   };
 })();
