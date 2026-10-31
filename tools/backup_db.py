@@ -1,5 +1,6 @@
 """بکاپ روزانهٔ دیتابیس؛ فقط ۷ بکاپ آخر نگه داشته می‌شود."""
 import sqlite3
+import time
 from datetime import datetime
 from pathlib import Path
 
@@ -27,6 +28,30 @@ def prune() -> None:
         old.unlink()
 
 
+# Manual backups (pre-migrate etc.): keep newest MANUAL_KEEP_MIN files,
+# delete older ones only if also older than MANUAL_KEEP_DAYS.
+MANUAL_KEEP_DAYS = 14
+MANUAL_KEEP_MIN = 10
+MANUAL_PATTERNS = ("nerkhcar*.db", "nerkhcar.db.*", "pre-*.db")
+
+
+def prune_manual(out=OUT, now=None, days=MANUAL_KEEP_DAYS, keep_min=MANUAL_KEEP_MIN):
+    now = time.time() if now is None else now
+    found = set()
+    for pat in MANUAL_PATTERNS:
+        for p in Path(out).glob(pat):
+            if p.is_file() and not p.name.startswith("daily."):
+                found.add(p)
+    newest_first = sorted(found, key=lambda p: p.stat().st_mtime, reverse=True)
+    removed = []
+    for p in newest_first[keep_min:]:
+        if now - p.stat().st_mtime > days * 86400:
+            p.unlink()
+            removed.append(p)
+    return removed
+
+
 if __name__ == "__main__":
     print("بکاپ:", make_backup())
     prune()
+    print("پاک‌شده از دستی:", [p.name for p in prune_manual()])
