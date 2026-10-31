@@ -11,13 +11,16 @@ from app.adapters.telegram.handlers import (
     fx_price, menu_stub, music_upload, my_car, price_import, specs, start,
 )
 from app.adapters.telegram.texts import menu
+from app.adapters.telegram.texts import error_alert as alert_texts
 from app.adapters.telegram.throttle import ThrottleMiddleware
+from app.core.error_alert import ErrorAlertGate
 from app.config import Settings, load_settings
 from app.data import db, repo_admins, repo_audit
 from app.jobs import car_price_job
 from app.logging_setup import setup_logging
 
 log = logging.getLogger("nerkhcar")
+_ALERT_GATE = ErrorAlertGate()
 
 # ترتیب مهم است: menu_stub باید آخر باشد
 ROUTER_MODULES = (
@@ -27,11 +30,19 @@ ROUTER_MODULES = (
 )
 
 
-async def on_error(event: ErrorEvent) -> bool:
-    log.error("خطای پیش‌بینی‌نشده: %s", type(event.exception).__name__)
+async def on_error(event: ErrorEvent, bot=None, settings=None) -> bool:
+    kind = type(event.exception).__name__
+    log.error("خطای پیش‌بینی‌نشده: %s", kind)
     message = event.update.message
     if message:
         await message.answer(menu.ERROR_GENERIC)
+    if bot is not None and settings is not None and _ALERT_GATE.allow():
+        try:
+            await bot.send_message(
+                settings.owner_id, alert_texts.OWNER_ERROR.format(kind=kind)
+            )
+        except Exception as exc:
+            log.warning("owner error alert failed: %s", type(exc).__name__)
     return True
 
 
