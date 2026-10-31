@@ -11,6 +11,7 @@ from app.adapters.telegram.handlers import (
     fx_price, menu_stub, music_upload, my_car, price_import, specs, start,
 )
 from app.adapters.telegram.texts import menu
+from app.adapters.telegram.throttle import ThrottleMiddleware
 from app.config import Settings, load_settings
 from app.data import db, repo_admins, repo_audit
 from app.jobs import car_price_job
@@ -46,6 +47,10 @@ def prepare_db(settings: Settings) -> None:
 
 def build_dispatcher(settings: Settings) -> Dispatcher:
     dp = Dispatcher(settings=settings)
+    owner = getattr(settings, "owner_id", None)
+    throttle = ThrottleMiddleware(exempt_ids=(owner,) if owner else ())
+    dp.message.outer_middleware(throttle)
+    dp.callback_query.outer_middleware(throttle)
     for module in ROUTER_MODULES:
         dp.include_router(module.router)
     dp.errors.register(on_error)
