@@ -59,6 +59,6 @@
     q.placeholder = T.prices.search;
     q.value = NK.S.q;
     q.addEventListener('input', function () { NK.S.q = q.value; box.replaceChildren(list()); });
-    return U.h('div', 'l-page', null, [U.h('div', 'c-hd', null, [P.wordmark(), P.motif(), P.brand()]), fxStrip(), q, chips(), box, cta(), P.note(T.disc)]);
+    return U.h('div', 'l-page', null, [U.h('div', 'c-hd', null, [P.wordmark(), P.motif(), P.brand()]), fxStrip(), q, box, cta(), P.note(T.disc)]);
   };
 })();

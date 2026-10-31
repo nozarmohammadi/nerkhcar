@@ -2,7 +2,7 @@
 window.NK = window.NK || {};
 NK.T = {
   app: 'نرخ‌کار',
-  appTitle: 'نرخـــکار',
+  appTitle: 'نرخـــــکار',
   appEn: 'Nerkhcar',
   digits: '۰۱۲۳۴۵۶۷۸۹',
   disc: 'تخمین است، نه تعهد',

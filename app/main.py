@@ -16,7 +16,7 @@ from app.adapters.telegram.throttle import ThrottleMiddleware
 from app.core.error_alert import ErrorAlertGate
 from app.config import Settings, load_settings
 from app.data import db, repo_admins, repo_audit
-from app.jobs import car_price_job
+from app.jobs import car_price_job, fx_job
 from app.logging_setup import setup_logging
 
 log = logging.getLogger("nerkhcar")
@@ -75,6 +75,7 @@ async def main() -> None:
     bot = Bot(token=settings.bot_token)
     log.info("ربات در حال شروع است")
     price_task = asyncio.create_task(car_price_job.loop(settings, bot))
+    fx_task = asyncio.create_task(fx_job.loop(settings))
     await build_dispatcher(settings).start_polling(bot)
 
 
