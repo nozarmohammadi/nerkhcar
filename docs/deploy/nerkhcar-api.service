@@ -1,0 +1,19 @@
+[Unit]
+Description=Nerkhcar read-only JSON API (mini-app)
+After=network.target
+
+[Service]
+Type=simple
+User=nerkhcar
+Group=nerkhcar
+WorkingDirectory=/opt/nerkhcar
+ExecStart=/opt/nerkhcar/venv/bin/python -m app.api
+Restart=on-failure
+RestartSec=5
+MemoryMax=120M
+NoNewPrivileges=true
+PrivateTmp=true
+ProtectSystem=full
+
+[Install]
+WantedBy=multi-user.target
