@@ -26,7 +26,7 @@
   --font: 'Vazirmatn', system-ui, Tahoma, sans-serif;
   --f-xs: 11px; --f-sm: 12px; --f-md: 14px; --f-lg: 18px; --f-xl: 22px; --f-xxl: 34px;
   /* icon */
-  --icon-size: 22px; --icon-stroke: 1.7;
+  --icon-size: 22px; --icon-stroke: 1.7; --logo-h: 40px;
   /* layout */
   --app-width: 390px; --tabbar-h: 64px;
 }

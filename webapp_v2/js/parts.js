@@ -7,11 +7,24 @@ NK.P = (function () {
   function sub(d) { return d.brand + ' · ' + U.year(d.year); }
   function price(d, big) {
     return U.h('div', 'c-price' + (big ? ' c-price--big' : ''), null, [
-      U.h('span', 'c-price__num', U.fa(d.price_m)), U.h('span', 'c-price__unit', T.prices.unit)]);
+      U.h('span', 'c-price__num', U.full(d.price_m)), U.h('span', 'c-price__unit', T.prices.unitFull)]);
   }
   function row(d, short) {
     var main = U.h('div', 'c-row__main', null, [U.h('b', 'c-row__name', d.name), U.h('span', 'c-row__sub', short ? U.year(d.year) : sub(d))]);
     return U.on(U.h('div', 'c-row', null, [main, price(d)]), function () { NK.openCar(d.id); });
+  }
+  // Header motif: three fading gold speed lines between the name and the logo.
+  function motif() {
+    return U.h('div', 'c-hd__lines', null, [1, 2, 3].map(function (n) { return U.h('i', 'c-hd__line c-hd__line--' + n); }));
+  }
+  // Header wordmark: Persian name + small English name under it (right side).
+  function wordmark() {
+    return U.h('div', 'c-hd__text', null, [U.h('h1', 'c-hd__title', T.appTitle), U.h('span', 'c-hd__en', T.appEn)]);
+  }
+  // Brand mark: the logo only (header, left side).
+  function brand() {
+    var svg = U.logo();
+    return U.h('div', 'c-brand', null, [svg]);
   }
   function empty(msg, hint, label, fn) {
     var box = U.h('div', 'c-empty', null, [U.h('p', null, msg)]);
@@ -30,5 +43,5 @@ NK.P = (function () {
     return empty(T.state[st] || T.state.error, null, T.state.retry, NK.load);
   }
   function options() { return NK.S.rows.map(function (r) { return { v: r.id, l: r.name + ' · ' + U.year(r.year) }; }); }
-  return { title: title, note: note, sub: sub, price: price, row: row, empty: empty, state: state, options: options };
+  return { motif: motif, wordmark: wordmark, brand: brand, title: title, note: note, sub: sub, price: price, row: row, empty: empty, state: state, options: options };
 })();

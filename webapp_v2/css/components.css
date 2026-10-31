@@ -66,7 +66,7 @@ body { background: var(--c-bg); color: var(--c-text); font-size: var(--f-md); }
 
 /* prices page: header, brand card, cta */
 .l-stack { display: flex; flex-direction: column; gap: var(--s-3); }
-.c-hd { margin: calc(var(--s-4) * -1) calc(var(--s-4) * -1) 0; padding: var(--s-5) var(--s-4) var(--s-4); background: var(--c-primary); color: var(--c-on-primary); border-radius: 0 0 var(--r-3) var(--r-3); }
+.c-hd { display: flex; align-items: center; justify-content: space-between; margin: calc(var(--s-4) * -1) calc(var(--s-4) * -1) 0; padding: var(--s-5) var(--s-4) var(--s-4); background: var(--c-primary); color: var(--c-on-primary); border-radius: 0 0 var(--r-3) var(--r-3); }
 .c-card { padding: var(--s-1) var(--s-4); border: 1px solid var(--c-line); border-radius: var(--r-3); background: var(--c-surface); }
 .c-card__head { display: flex; align-items: center; gap: var(--s-2); padding: var(--s-3) 0 var(--s-2); }
 .c-card__bar { width: 4px; height: 16px; border-radius: 4px; background: var(--c-accent); }
@@ -78,3 +78,18 @@ body { background: var(--c-bg); color: var(--c-text); font-size: var(--f-md); }
 .c-cta__sub { font-size: var(--f-xs); opacity: .8; }
 .c-cta__plus { width: 44px; height: 44px; display: flex; align-items: center; justify-content: center; border-radius: var(--r-2); background: var(--c-accent); color: var(--c-on-accent); font-size: var(--f-xl); }
 .c-cta__title { font-weight: 700; }
+
+/* brand logo in the header */
+.c-brand { display: flex; align-items: center; }
+.c-logo__img { height: var(--logo-h); width: auto; }
+.c-logo__car { fill: var(--c-on-primary); fill-rule: evenodd; }
+.c-logo__arrow { fill: var(--c-accent); }
+/* header decoration: three fading gold speed lines between the name and the logo */
+.c-hd__lines { flex: 1; min-width: 0; display: flex; flex-direction: column; align-items: flex-start; gap: var(--s-2); direction: ltr; }
+.c-hd__line { height: 3px; border-radius: var(--r-pill); background: var(--c-accent); }
+.c-hd__line--1 { width: 55%; opacity: .8; }
+.c-hd__line--2 { width: 85%; opacity: .5; }
+.c-hd__line--3 { width: 32%; opacity: .28; }
+.c-hd__text { display: flex; flex-direction: column; gap: var(--s-1); }
+.c-hd__title { font-size: var(--f-lg); font-weight: 700; line-height: 1.2; }
+.c-hd__en { font-size: var(--f-xs); letter-spacing: .2em; text-transform: uppercase; color: var(--c-accent); direction: ltr; text-align: right; }

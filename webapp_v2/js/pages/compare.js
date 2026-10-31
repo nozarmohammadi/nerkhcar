@@ -6,7 +6,7 @@
     var t = T.compare;
     return U.h('div', 'c-scroll', null, [U.h('table', 'c-table', null, [
       tr('', a.name, b.name), tr(t.year, U.year(a.year), U.year(b.year)),
-      tr(t.price, U.fa(a.price_m), U.fa(b.price_m)), tr(t.diff, '', U.fa(Math.abs(a.price_m - b.price_m)))])]);
+      tr(t.price, U.full(a.price_m), U.full(b.price_m)), tr(t.diff, '', U.full(Math.abs(a.price_m - b.price_m)))])]);
   }
   NK.PAGES.compare = function () {
     var S = NK.S, st = P.state(), page = U.h('div', 'l-page', null, [P.title(T.compare.title)]);
@@ -15,7 +15,7 @@
     [0, 1].forEach(function (i) {
       page.append(U.select(P.options(), ids[i], function (v) { S.cmp[i] = v; NK.draw(); }));
     });
-    page.append(table(NK.byId(ids[0]), NK.byId(ids[1])), P.note(T.prices.unit + ' · ' + T.disc));
+    page.append(table(NK.byId(ids[0]), NK.byId(ids[1])), P.note(T.prices.unitFull + ' · ' + T.disc));
     return page;
   };
 })();
